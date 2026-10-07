@@ -208,12 +208,33 @@ export default function CartClient() {
           margin: 0;
         }
         .cart-qty-badge {
-          display: inline-block;
+          display: flex;
+          align-items: center;
+          gap: 12px;
           background: #fff;
           border: 1px solid #ede3c9;
-          padding: 8px 24px;
+          padding: 6px 12px;
           border-radius: 8px;
           font-weight: 500;
+          width: fit-content;
+          margin: 0 auto;
+        }
+        .qty-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          color: #a83d22;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          border-radius: 4px;
+          transition: background 0.2s;
+        }
+        .qty-btn:hover {
+          background: #fbf9f4;
         }
         .cart-total-cell {
           text-align: right;
@@ -332,11 +353,53 @@ export default function CartClient() {
                         </div>
                       </td>
                       <td className="center">
-                        <span className="cart-qty-badge">{item.qty}</span>
+                        <div className="cart-qty-badge">
+                          <button 
+                            className="qty-btn"
+                            onClick={async () => {
+                              const formData = new FormData();
+                              formData.append("cartKey", item.id + '_' + item.color);
+                              formData.append("action", "decrease");
+                              await fetch("http://localhost:8080/cart/apiUpdateQty", {
+                                method: "POST",
+                                body: formData,
+                                credentials: "include"
+                              });
+                              window.dispatchEvent(new Event('cart-updated'));
+                              window.location.reload(); 
+                            }}
+                          >-</button>
+                          <span>{item.qty}</span>
+                          <button 
+                            className="qty-btn"
+                            onClick={async () => {
+                              const formData = new FormData();
+                              formData.append("cartKey", item.id + '_' + item.color);
+                              formData.append("action", "increase");
+                              await fetch("http://localhost:8080/cart/apiUpdateQty", {
+                                method: "POST",
+                                body: formData,
+                                credentials: "include"
+                              });
+                              window.dispatchEvent(new Event('cart-updated'));
+                              window.location.reload();
+                            }}
+                          >+</button>
+                        </div>
                       </td>
                       <td className="cart-total-cell">
                         <p className="cart-item-total">₹{parseInt(item.offer_price) * parseInt(item.qty)}</p>
-                        <button className="cart-remove-btn">
+                        <button className="cart-remove-btn" onClick={async () => {
+                          const formData = new FormData();
+                          formData.append("cartKey", item.id + '_' + item.color);
+                          await fetch("http://localhost:8080/cart/apiRemove", {
+                            method: "POST",
+                            body: formData,
+                            credentials: "include"
+                          });
+                          window.dispatchEvent(new Event('cart-updated'));
+                          window.location.reload();
+                        }}>
                           <Trash2 size={14} /> Remove
                         </button>
                       </td>
