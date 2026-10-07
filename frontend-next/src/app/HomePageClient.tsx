@@ -48,11 +48,10 @@ const HERO_IMAGES = [
 ];
 
 const SUBCATEGORIES = [
-  { name: "Pure Silk Cotton Sarees", img: "/saree-icon.avif" },
-  { name: "Pure Silk Sarees", img: "/saree-icon.avif" },
-  { name: "Pure Tissue Saree", img: "/saree-icon.avif" },
-  { name: "Pure Organza Saree", img: "/saree-icon.avif" },
-  { name: "Pure Mulberry", img: "/saree-icon.avif" },
+  { name: "Pure Cotton Saree", img: "/coll.png" },
+  { name: "Pure Silk Cotton Sarees", img: "/coll01.png" },
+  { name: "Pure Silk Sarees", img: "/coll.png" },
+  { name: "Pure Tissue Saree", img: "/coll01.png" },
 ];
 
 const NEW_ARRIVALS = [
@@ -1163,7 +1162,7 @@ export default function Index({
               <li><a href="/shop/3">Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
-                <a href="#">Shop by Collection <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
+                <a href="#">Shop by Categories <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
                 <ul className="dropdown">
                   {COLLECTION_MENU.map((item) => (
                     <li key={item.name}>
@@ -1306,17 +1305,26 @@ export default function Index({
       <FloralDivider />
 
       {/* ══════════ SUB-CATEGORY ICONS ══════════ */}
-      <section className="subcategory-icons">
-        {SUBCATEGORIES.map((cat) => (
-          <a key={cat.name} href="#" className="subcategory-item">
-            <img src={cat.img} alt={cat.name} />
-            <span>{cat.name}</span>
-          </a>
-        ))}
+      <section style={{ background: "#fcf8f2" }}>
+        <div className="section-header">
+          <h2>
+            <SectionOrnament kind="sparkle" />
+            <span style={{ color: "#ac4024" }}>Top Trending Collections</span>
+            <SectionOrnament kind="sparkle" reverse />
+          </h2>
+        </div>
+        <div className="subcategory-icons" style={{ background: "transparent", paddingTop: 0 }}>
+          {SUBCATEGORIES.map((cat) => (
+            <a key={cat.name} href="#" className="subcategory-item">
+              <img src={cat.img} alt={cat.name} />
+              <span>{cat.name}</span>
+            </a>
+          ))}
+        </div>
       </section>
 
       {/* ══════════ NEW ARRIVALS ══════════ */}
-      <section className="new-arrivals-section">
+      <section className="new-arrivals-section" style={{ backgroundImage: "url('/elegant_indian_bg.jpg')", backgroundRepeat: "repeat" }}>
         <div className="section-header">
           <h2>
             <SectionOrnament kind="sparkle" />

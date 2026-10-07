@@ -295,14 +295,13 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
               <li><a href="/shop/7">Best Seller</a></li>
               <li><a href="#">Same Day Dispatch</a></li>
               <li>
-                <span className="nav-badge-new">(NEW)</span>
                 <a href="/shop/2">Lehenga</a>
               </li>
               <li><a href="/shop/3">Suit Sets</a></li>
               <li><a href="/shop/3">Dresses</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
-                <a href="#">Shop by Collection <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
+                <a href="#">Shop by Categories <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
                 <ul className="dropdown">
                   {COLLECTION_MENU.map((item) => (
                     <li key={item.name}>
