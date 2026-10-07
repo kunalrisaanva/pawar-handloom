@@ -1,0 +1,63 @@
+.activeClass{
+    background: #01ff70;
+    padding: 5px 5px 5px 5px;
+    border: 1px solid #01ff70;
+    border-radius: 5px;
+    cursor: pointer;
+    color: crimson;
+}
+.inactiveClass {
+    background: crimson;
+    padding: 5px 5px 5px 5px;
+    border: 1px solid crimson;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #01ff70;
+}
+#debug-icon {
+    display: none !important;
+}
+.swal2-html-container{
+    color: #fff !important;
+}
+.deleteCategory{
+    cursor: pointer !important;
+}
+.editCategory{
+    cursor: pointer !important;
+}
+
+.setting-pills .pills-icon{
+    padding: 1px 2px 1px 1px;
+    font-size: 16px;
+}
+.paid{
+    background: red;
+    padding: 1px 4px 1px 4px;
+    border-radius: 2px;
+}
+.unpaid{
+    background:  #36e714;
+    padding: 1px 4px 1px 4px;
+    border-radius: 2px;
+}
+.customer_label{
+    color: #00ffcb;
+    font-size: 19px;
+}
+.customer_value{
+    font-size: 19px;
+}
+.dark-mode .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice{
+    color: #000 !important;
+}
+.dark-mode .select2-container .select2-search--inline .select2-search__field{
+    color: #000 !important;
+}
+
+/*Multiple Colour Select Background change */
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+    background-color: #3d3b3b !important;
+}
+
+/*Multiple Colour Select Background change*/
