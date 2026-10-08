@@ -48,10 +48,10 @@ const HERO_IMAGES = [
 ];
 
 const SUBCATEGORIES = [
-  { name: "Pure Cotton Saree", img: "/coll.png" },
-  { name: "Pure Silk Cotton Sarees", img: "/coll01.png" },
-  { name: "Pure Silk Sarees", img: "/coll.png" },
-  { name: "Pure Tissue Saree", img: "/coll01.png" },
+  { name: "Pure Cotton Saree", img: "/coll.png", slug: "pure-cotton-saree" },
+  { name: "Pure Silk Cotton Sarees", img: "/coll01.png", slug: "pure-silk-cotton-sarees" },
+  { name: "Pure Silk Sarees", img: "/coll.png", slug: "pure-silk-sarees" },
+  { name: "Pure Tissue Saree", img: "/coll01.png", slug: "pure-tissue-saree" },
 ];
 
 const NEW_ARRIVALS = [
@@ -63,6 +63,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-silver-zari-1",
   },
   {
     name: "Pure Maheshwari golden zari...",
@@ -72,6 +73,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-golden-zari-1",
   },
   {
     name: "Pure Maheshwari silver zari...",
@@ -81,6 +83,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-silver-zari-2",
   },
   {
     name: "Pure Chanderi silk cotton...",
@@ -90,14 +93,15 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-chanderi-silk-cotton-1",
   },
 ];
 
 const SAREE_CATEGORIES = [
-  { name: "Maheshwari Sarees", img: "/shop-category-1.png" },
-  { name: "Chanderi Sarees", img: "/shop-category-2.png" },
-  { name: "Handblock Printed Sarees", img: "/shop-category-3.png" },
-  { name: "Pure Cotton Sarees", img: "/shop-category-4.png" },
+  { name: "Maheshwari Sarees", img: "/shop-category-1.png", slug: "maheshwari-sarees" },
+  { name: "Chanderi Sarees", img: "/shop-category-2.png", slug: "chanderi-sarees" },
+  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", slug: "handblock-printed-sarees" },
+  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", slug: "pure-cotton-sarees" },
 ];
 
 const DRESS_MATERIALS = [
@@ -107,6 +111,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "maheshwari-bagh-suits",
   },
   {
     name: "Dress Material",
@@ -114,6 +119,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-1",
   },
   {
     name: "Dress Material",
@@ -121,6 +127,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-2",
   },
   {
     name: "Dress Material",
@@ -128,6 +135,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-3",
   },
 ];
 
@@ -139,6 +147,7 @@ const BEST_SELLERS = [
     salePrice: "4,050.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-silver-zari-bs1",
   },
   {
     name: "Pure Maheshwari golden zari...",
@@ -147,6 +156,7 @@ const BEST_SELLERS = [
     salePrice: "2,700.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-golden-zari-bs1",
   },
   {
     name: "Pure Maheshwari silver zari...",
@@ -155,6 +165,7 @@ const BEST_SELLERS = [
     salePrice: "2,475.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-silver-zari-bs2",
   },
   {
     name: "Pure Chanderi silk cotton...",
@@ -163,6 +174,7 @@ const BEST_SELLERS = [
     salePrice: "2,250.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-chanderi-silk-cotton-bs1",
   },
 ];
 
@@ -173,6 +185,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "10,000.00",
     salePrice: "9,000.00",
     discount: "10% OFF",
+    slug: "maheshwari-heavy-pallu-saree",
   },
   {
     name: "Maheshwari saree",
@@ -180,6 +193,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "7,500.00",
     salePrice: "6,750.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-1",
   },
   {
     name: "Maheshwari Pure Mullbery Silk Saree",
@@ -187,6 +201,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "22,000.00",
     salePrice: "19,800.00",
     discount: "10% OFF",
+    slug: "maheshwari-pure-mullbery-silk-saree",
   },
   {
     name: "Silver Boarder Saree",
@@ -194,6 +209,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "6,300.00",
     salePrice: "5,670.00",
     discount: "10% OFF",
+    slug: "silver-boarder-saree",
   },
   {
     name: "Maheshwari Saree",
@@ -201,6 +217,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "5,700.00",
     salePrice: "5,130.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-2",
   },
   {
     name: "Maheshwari saree",
@@ -208,6 +225,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "5,800.00",
     salePrice: "5,220.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-3",
   },
 ];
 
@@ -582,6 +600,7 @@ function ProductCard({
   reviewCount,
   sizes,
   id,
+  slug,
 }: {
   name: string;
   img: string;
@@ -594,13 +613,17 @@ function ProductCard({
   reviewCount?: number;
   sizes?: string[]; // lehengas / suit sets / dresses; sarees leave this out
   id?: string | number;
+  slug?: string;
 }) {
   const [liked, setLiked] = useState(false);
+  const linkHref = slug ? `/${slug}` : "#";
 
   return (
     <div className="product-card">
       <div className="product-card-media">
-        <img src={img} alt={name} className="product-card-img" loading="lazy" />
+        <a href={linkHref} style={{ display: 'block' }}>
+          <img src={img} alt={name} className="product-card-img" loading="lazy" />
+        </a>
         {badge && <span className="product-card-badge">{badge}</span>}
         <button
           type="button"
@@ -630,7 +653,9 @@ function ProductCard({
             )}
           </div>
         )}
-        <h4 className="product-card-name" title={name}>{name}</h4>
+        <a href={linkHref} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <h4 className="product-card-name" title={name}>{name}</h4>
+        </a>
         <div className="product-card-footer">
           <div className="product-card-pricing">
             <p className="product-card-price">
@@ -726,10 +751,21 @@ function ShopByCategoryTabs() {
   const [activeTab, setActiveTab] = useState("Sarees");
   const tabs = ["Sarees", "Dress Materials"];
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#dress-materials') {
+        setActiveTab("Dress Materials");
+      }
+    };
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const currentData = activeTab === "Sarees" ? SAREE_CATEGORIES : DRESS_MATERIALS;
 
   return (
-    <section className="shop-category-section">
+    <section id="dress-materials" className="shop-category-section">
       <div className="section-header">
         <h2 className="dark">
           <SectionOrnament kind="lotus" />
@@ -754,9 +790,11 @@ function ShopByCategoryTabs() {
         {currentData.map((cat, idx) => (
           <div key={cat.name + idx} className="category-card">
             <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
-            <img src={cat.img} alt={cat.name} className="category-card-img" />
+            <a href={`/${(cat as any).slug || '#'}`} style={{ display: 'block' }}>
+              <img src={cat.img} alt={cat.name} className="category-card-img" />
+            </a>
             <h4>{cat.name}</h4>
-            <a href="#" className="btn-details">DETAILS</a>
+            <a href={`/${(cat as any).slug || '#'}`} className="btn-details">DETAILS</a>
           </div>
         ))}
       </div>
@@ -972,7 +1010,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", // Calculate if needed
         badge: "NEW",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -985,7 +1024,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", // Calculate if needed
         badge: "BEST SELLER",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -998,7 +1038,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : DRESS_MATERIALS;
 
@@ -1011,7 +1052,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : SEE_IT_LOVE_IT;
 
@@ -1024,7 +1066,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -1159,7 +1202,7 @@ export default function Index({
               <li>
                 <a href="/shop/2">Sarees</a>
               </li>
-              <li><a href="/shop/3">Dress Materials</a></li>
+              <li><a href="/#dress-materials">Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
                 <a href="#">Shop by Categories <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
@@ -1216,7 +1259,7 @@ export default function Index({
               <li><a href="/shop/7">Best Seller</a></li>
               <li><a href="#">Same Day Dispatch</a></li>
               <li><a href="/shop/2">Sarees</a></li>
-              <li><a href="/shop/3">Dress Materials</a></li>
+              <li><a href="/#dress-materials" onClick={() => setMobileMenuOpen(false)}>Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
                 <a
@@ -1315,7 +1358,7 @@ export default function Index({
         </div>
         <div className="subcategory-icons" style={{ background: "transparent", paddingTop: 0 }}>
           {SUBCATEGORIES.map((cat) => (
-            <a key={cat.name} href="#" className="subcategory-item">
+            <a key={cat.name} href={`/${(cat as any).slug || '#'}`} className="subcategory-item">
               <img src={cat.img} alt={cat.name} />
               <span>{cat.name}</span>
             </a>
@@ -1431,7 +1474,9 @@ export default function Index({
           {displayCelebsLook.map((product, i) => (
             <div key={i} className="celebs-card">
               <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
-              <img src={product.img} alt={`Celebs ${i + 1}`} />
+              <a href={`/${(product as any).slug || '#'}`} style={{ display: 'block', height: '100%' }}>
+                <img src={product.img} alt={`Celebs ${i + 1}`} />
+              </a>
             </div>
           ))}
         </div>
