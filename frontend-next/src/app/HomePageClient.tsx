@@ -48,11 +48,10 @@ const HERO_IMAGES = [
 ];
 
 const SUBCATEGORIES = [
-  { name: "Pure Silk Cotton Sarees", img: "/saree-icon.avif" },
-  { name: "Pure Silk Sarees", img: "/saree-icon.avif" },
-  { name: "Pure Tissue Saree", img: "/saree-icon.avif" },
-  { name: "Pure Organza Saree", img: "/saree-icon.avif" },
-  { name: "Pure Mulberry", img: "/saree-icon.avif" },
+  { name: "Pure Cotton Saree", img: "/coll.png", slug: "pure-cotton-saree" },
+  { name: "Pure Silk Cotton Sarees", img: "/coll01.png", slug: "pure-silk-cotton-sarees" },
+  { name: "Pure Silk Sarees", img: "/coll.png", slug: "pure-silk-sarees" },
+  { name: "Pure Tissue Saree", img: "/coll01.png", slug: "pure-tissue-saree" },
 ];
 
 const NEW_ARRIVALS = [
@@ -64,6 +63,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-silver-zari-1",
   },
   {
     name: "Pure Maheshwari golden zari...",
@@ -73,6 +73,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-golden-zari-1",
   },
   {
     name: "Pure Maheshwari silver zari...",
@@ -82,6 +83,7 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-maheshwari-silver-zari-2",
   },
   {
     name: "Pure Chanderi silk cotton...",
@@ -91,14 +93,15 @@ const NEW_ARRIVALS = [
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
+    slug: "pure-chanderi-silk-cotton-1",
   },
 ];
 
 const SAREE_CATEGORIES = [
-  { name: "Maheshwari Sarees", img: "/shop-category-1.png" },
-  { name: "Chanderi Sarees", img: "/shop-category-2.png" },
-  { name: "Handblock Printed Sarees", img: "/shop-category-3.png" },
-  { name: "Pure Cotton Sarees", img: "/shop-category-4.png" },
+  { name: "Maheshwari Sarees", img: "/shop-category-1.png", slug: "maheshwari-sarees" },
+  { name: "Chanderi Sarees", img: "/shop-category-2.png", slug: "chanderi-sarees" },
+  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", slug: "handblock-printed-sarees" },
+  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", slug: "pure-cotton-sarees" },
 ];
 
 const DRESS_MATERIALS = [
@@ -108,6 +111,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "maheshwari-bagh-suits",
   },
   {
     name: "Dress Material",
@@ -115,6 +119,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-1",
   },
   {
     name: "Dress Material",
@@ -122,6 +127,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-2",
   },
   {
     name: "Dress Material",
@@ -129,6 +135,7 @@ const DRESS_MATERIALS = [
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    slug: "dress-material-3",
   },
 ];
 
@@ -140,6 +147,7 @@ const BEST_SELLERS = [
     salePrice: "4,050.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-silver-zari-bs1",
   },
   {
     name: "Pure Maheshwari golden zari...",
@@ -148,6 +156,7 @@ const BEST_SELLERS = [
     salePrice: "2,700.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-golden-zari-bs1",
   },
   {
     name: "Pure Maheshwari silver zari...",
@@ -156,6 +165,7 @@ const BEST_SELLERS = [
     salePrice: "2,475.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-maheshwari-silver-zari-bs2",
   },
   {
     name: "Pure Chanderi silk cotton...",
@@ -164,6 +174,7 @@ const BEST_SELLERS = [
     salePrice: "2,250.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
+    slug: "pure-chanderi-silk-cotton-bs1",
   },
 ];
 
@@ -174,6 +185,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "10,000.00",
     salePrice: "9,000.00",
     discount: "10% OFF",
+    slug: "maheshwari-heavy-pallu-saree",
   },
   {
     name: "Maheshwari saree",
@@ -181,6 +193,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "7,500.00",
     salePrice: "6,750.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-1",
   },
   {
     name: "Maheshwari Pure Mullbery Silk Saree",
@@ -188,6 +201,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "22,000.00",
     salePrice: "19,800.00",
     discount: "10% OFF",
+    slug: "maheshwari-pure-mullbery-silk-saree",
   },
   {
     name: "Silver Boarder Saree",
@@ -195,6 +209,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "6,300.00",
     salePrice: "5,670.00",
     discount: "10% OFF",
+    slug: "silver-boarder-saree",
   },
   {
     name: "Maheshwari Saree",
@@ -202,6 +217,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "5,700.00",
     salePrice: "5,130.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-2",
   },
   {
     name: "Maheshwari saree",
@@ -209,6 +225,7 @@ const SEE_IT_LOVE_IT = [
     originalPrice: "5,800.00",
     salePrice: "5,220.00",
     discount: "10% OFF",
+    slug: "maheshwari-saree-3",
   },
 ];
 
@@ -583,6 +600,7 @@ function ProductCard({
   reviewCount,
   sizes,
   id,
+  slug,
 }: {
   name: string;
   img: string;
@@ -595,13 +613,17 @@ function ProductCard({
   reviewCount?: number;
   sizes?: string[]; // lehengas / suit sets / dresses; sarees leave this out
   id?: string | number;
+  slug?: string;
 }) {
   const [liked, setLiked] = useState(false);
+  const linkHref = slug ? `/${slug}` : "#";
 
   return (
     <div className="product-card">
       <div className="product-card-media">
-        <img src={img} alt={name} className="product-card-img" loading="lazy" />
+        <a href={linkHref} style={{ display: 'block' }}>
+          <img src={img} alt={name} className="product-card-img" loading="lazy" />
+        </a>
         {badge && <span className="product-card-badge">{badge}</span>}
         <button
           type="button"
@@ -631,7 +653,9 @@ function ProductCard({
             )}
           </div>
         )}
-        <h4 className="product-card-name" title={name}>{name}</h4>
+        <a href={linkHref} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <h4 className="product-card-name" title={name}>{name}</h4>
+        </a>
         <div className="product-card-footer">
           <div className="product-card-pricing">
             <p className="product-card-price">
@@ -720,18 +744,36 @@ function Coupons() {
   );
 }
 
-/* ── Shop By Occasion Component ── */
-function ShopByOccasion() {
-  const [activeTab, setActiveTab] = useState("Lehenga");
-  const tabs = ["Lehenga", "Suit Sets", "Dresses"];
+
+
+/* ── Shop By Category Tabs Component ── */
+function ShopByCategoryTabs() {
+  const [activeTab, setActiveTab] = useState("Sarees");
+  const tabs = ["Sarees", "Dress Materials"];
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#dress-materials') {
+        setActiveTab("Dress Materials");
+      }
+    };
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const currentData = activeTab === "Sarees" ? SAREE_CATEGORIES : DRESS_MATERIALS;
 
   return (
-    <section className="shop-by-occasion-section">
-      <div className="sbo-header">
-        <h2 className="sbo-title">Shop by Category</h2>
-        <a href="#" className="sbo-view-all">View All <ArrowUpRight size={16} style={{ marginBottom: 2 }} /></a>
+    <section id="dress-materials" className="shop-category-section">
+      <div className="section-header">
+        <h2 className="dark">
+          <SectionOrnament kind="lotus" />
+          Shop By Category
+          <SectionOrnament kind="lotus" reverse />
+        </h2>
       </div>
-      
+
       <div className="sbo-tabs">
         {tabs.map(tab => (
           <button 
@@ -743,17 +785,16 @@ function ShopByOccasion() {
           </button>
         ))}
       </div>
-      
-      <div className="sbo-grid">
-        {OCCASIONS.map(occ => (
-          <div key={occ.name} className="sbo-card">
-            <img src={occ.img} alt={occ.name} className="sbo-card-img" loading="lazy" />
-            <div className="sbo-card-overlay"></div>
-            <div className="sbo-card-icon"><ArrowUpRight size={18} /></div>
-            <div className="sbo-card-content">
-              <h3>{occ.name}</h3>
-              <p>{occ.styles}</p>
-            </div>
+
+      <div className="product-grid">
+        {currentData.map((cat, idx) => (
+          <div key={cat.name + idx} className="category-card">
+            <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
+            <a href={`/${(cat as any).slug || '#'}`} style={{ display: 'block' }}>
+              <img src={cat.img} alt={cat.name} className="category-card-img" />
+            </a>
+            <h4>{cat.name}</h4>
+            <a href={`/${(cat as any).slug || '#'}`} className="btn-details">DETAILS</a>
           </div>
         ))}
       </div>
@@ -861,201 +902,42 @@ function SocialMediaSection() {
   );
 }
 
-function CustomerReviewsCarousel() {
-  // The playing review's own <video> is lifted out of its card into the popup
-  // and animated back again, so it never reloads or restarts.
-  const [active, setActive] = useState<number | null>(null);
-  const wrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const playRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const animating = useRef(false);
 
-  // Make sure the muted previews are running (autoplay can be skipped during hydration)
+const DUMMY_REVIEWS = [
+  { name: "Swetha Reddy", rating: 5, text: "The fabric feels soft and premium." },
+  { name: "Anita Sharma", rating: 5, text: "Beautiful print and fast delivery!" },
+  { name: "Priya Patel", rating: 4, text: "Loved the quality of the saree." },
+  { name: "Kavya Singh", rating: 5, text: "Colors are exactly as shown in picture." },
+];
+
+function RotatingReviewPill() {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
   useEffect(() => {
-    videoRefs.current.forEach((video) => {
-      if (!video) return;
-      video.muted = true;
-      video.play().catch(() => {});
-    });
-    return () => lockPageScroll(false);
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % DUMMY_REVIEWS.length);
+        setFade(true);
+      }, 300); // Wait for fade out
+    }, 4000); // Rotate every 4 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
-  const openVideo = (i: number) => {
-    const video = videoRefs.current[i];
-    const wrapper = wrapperRefs.current[i];
-    if (!video || !wrapper || animating.current) return;
-    animating.current = true;
-
-    lockPageScroll(true);
-    const from = wrapper.getBoundingClientRect();
-    flushSync(() => setActive(i)); // the video jumps to its centred popup box…
-    const to = video.getBoundingClientRect();
-    const radius = 8 / (from.width / to.width); // keeps the card's 8px corners while scaled
-
-    // …and is animated up to it from where the card is
-    const duration = motionMs(POPUP_OPEN_MS);
-    video.animate(
-      [
-        { transform: flipFrom(from, to), borderRadius: `${radius}px ${radius}px 0 0`, boxShadow: NO_SHADOW },
-        { transform: "none", borderRadius: "14px", boxShadow: POPUP_SHADOW },
-      ],
-      { duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
-    ).onfinish = () => {
-      video.controls = true;
-      animating.current = false;
-      closeRef.current?.focus();
-    };
-    backdropRef.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration, easing: "ease-out" });
-    closeRef.current?.animate(
-      [
-        { opacity: 0, transform: "scale(0.6)" },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: motionMs(280), delay: duration * 0.6, fill: "backwards", easing: "ease-out" },
-    );
-
-    // Play from the start with sound; fall back to muted if the browser blocks it
-    video.currentTime = 0;
-    video.muted = false;
-    video.play().catch(() => {
-      video.muted = true;
-      video.play().catch(() => {});
-    });
-  };
-
-  const closeVideo = useCallback(() => {
-    if (active === null || animating.current) return;
-    const video = videoRefs.current[active];
-    const wrapper = wrapperRefs.current[active];
-    if (!video || !wrapper) return;
-    animating.current = true;
-    video.controls = false;
-
-    const to = video.getBoundingClientRect();
-    const from = wrapper.getBoundingClientRect();
-    const radius = 8 / (from.width / to.width);
-    const duration = motionMs(POPUP_CLOSE_MS);
-
-    backdropRef.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration, easing: "ease-in", fill: "forwards" });
-    closeRef.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: duration / 2, fill: "forwards" });
-    const shrink = video.animate(
-      [
-        { transform: "none", borderRadius: "14px", boxShadow: POPUP_SHADOW },
-        { transform: flipFrom(from, to), borderRadius: `${radius}px ${radius}px 0 0`, boxShadow: NO_SHADOW },
-      ],
-      { duration, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" },
-    );
-    shrink.onfinish = () => {
-      video.muted = true; // carries on as the muted preview
-      flushSync(() => setActive(null)); // back in the card, exactly where the animation ended
-      shrink.cancel();
-      lockPageScroll(false);
-      animating.current = false;
-      playRefs.current[active]?.focus({ preventScroll: true });
-    };
-  }, [active]);
-
-  useEffect(() => {
-    if (active === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeVideo();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active, closeVideo]);
+  const review = DUMMY_REVIEWS[index];
 
   return (
-    <section className="customer-reviews-section">
-      <div className="customer-reviews-header">
-        <div>
-          <h2 className="customer-reviews-title">What Our Customer Say!</h2>
-          <p className="customer-reviews-subtitle">250+ style ready to dispatch</p>
-        </div>
-        <a href="#" className="sbo-view-all" style={{ borderBottom: "none" }}>
-          View All <ArrowUpRight size={16} />
-        </a>
+    <div className="header-review-pill" style={{ opacity: fade ? 1 : 0, transition: "opacity 0.3s ease" }}>
+      <img src={`https://ui-avatars.com/api/?name=${review.name.replace(" ", "+")}&background=random`} alt={review.name} />
+      <span>{review.name}</span>
+      <span style={{ color: "#ddd" }}>|</span>
+      <div className="stars">
+        <Star size={12} fill="currentColor" /> {review.rating}
       </div>
-
-      <div className="customer-reviews-grid">
-        {CUSTOMER_REVIEWS.map((review, i) => (
-          <div key={i} className="review-card">
-            <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
-            <div
-              ref={(el) => {
-                wrapperRefs.current[i] = el;
-              }}
-              className="review-card-img-wrapper"
-            >
-              {review.video ? (
-                <>
-                  <video
-                    ref={(el) => {
-                      videoRefs.current[i] = el;
-                    }}
-                    src={review.video}
-                    className={`review-card-img${active === i ? " is-lifted" : ""}`}
-                    aria-label={`Video review from ${review.name}`}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
-                  <button
-                    ref={(el) => {
-                      playRefs.current[i] = el;
-                    }}
-                    type="button"
-                    className="review-card-play"
-                    onClick={() => openVideo(i)}
-                    aria-label={`Play video review from ${review.name}`}
-                  >
-                    <span className="review-card-play-icon">
-                      <Play size={24} fill="currentColor" />
-                    </span>
-                  </button>
-                </>
-              ) : (
-                <img src={review.img} alt={review.name} className="review-card-img" loading="lazy" />
-              )}
-              <div className="review-card-stars-overlay">
-                <Star size={16} fill="currentColor" strokeWidth={0} />
-                <Star size={16} fill="currentColor" strokeWidth={0} />
-                <Star size={16} fill="currentColor" strokeWidth={0} />
-                <Star size={16} fill="currentColor" strokeWidth={0} />
-                <Star size={16} fill="currentColor" strokeWidth={0} />
-              </div>
-            </div>
-            <div className="review-card-content">
-              <h3 className="review-card-name">{review.name}</h3>
-              <p className="review-card-text">{review.text}</p>
-              <p className="review-card-product">{review.product}</p>
-              <p className="review-card-verified">
-                <CheckCircle size={14} fill="currentColor" stroke="#fff" /> Verified Buyer
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {active !== null &&
-        createPortal(
-          <>
-            <div ref={backdropRef} className="review-popup-backdrop" onClick={closeVideo} />
-            <button
-              ref={closeRef}
-              type="button"
-              className="review-popup-close"
-              onClick={closeVideo}
-              aria-label="Close video"
-            >
-              <X size={22} />
-            </button>
-          </>,
-          document.body,
-        )}
-    </section>
+      <span className="review-text">{review.text}</span>
+    </div>
   );
 }
 
@@ -1128,7 +1010,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", // Calculate if needed
         badge: "NEW",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -1141,7 +1024,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", // Calculate if needed
         badge: "BEST SELLER",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -1154,7 +1038,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : DRESS_MATERIALS;
 
@@ -1167,7 +1052,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : SEE_IT_LOVE_IT;
 
@@ -1180,7 +1066,8 @@ export default function Index({
         salePrice: p.offer_price,
         discount: "", 
         badge: "",
-        readyToShip: true
+        readyToShip: true,
+        slug: p.slug || p.id?.toString() || ""
       }))
     : NEW_ARRIVALS;
 
@@ -1270,15 +1157,7 @@ export default function Index({
             <button className="mobile-menu-toggle" aria-label="Open menu" onClick={() => setMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
-            <div className="header-review-pill">
-              <img src="https://ui-avatars.com/api/?name=Swetha+Reddy&background=random" alt="Swetha Reddy" />
-              <span>Swetha Reddy</span>
-              <span style={{ color: "#ddd" }}>|</span>
-              <div className="stars">
-                <Star size={12} fill="currentColor" /> 5
-              </div>
-              <span className="review-text">The fabric feels soft and premium.</span>
-            </div>
+            <RotatingReviewPill />
           </div>
 
           {/* Center: Logo */}
@@ -1321,14 +1200,12 @@ export default function Index({
               <li><a href="/shop/7">Best Seller</a></li>
               <li><a href="#">Same Day Dispatch</a></li>
               <li>
-                <span className="nav-badge-new">(NEW)</span>
-                <a href="/shop/2">Lehenga</a>
+                <a href="/shop/2">Sarees</a>
               </li>
-              <li><a href="/shop/3">Suit Sets</a></li>
-              <li><a href="/shop/3">Dresses</a></li>
+              <li><a href="/#dress-materials">Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
-                <a href="#">Shop by Collection <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
+                <a href="#">Shop by Categories <ChevronDown size={14} style={{ marginTop: 2 }} /></a>
                 <ul className="dropdown">
                   {COLLECTION_MENU.map((item) => (
                     <li key={item.name}>
@@ -1381,9 +1258,8 @@ export default function Index({
               <li><a href="/shop/6">New Arrival</a></li>
               <li><a href="/shop/7">Best Seller</a></li>
               <li><a href="#">Same Day Dispatch</a></li>
-              <li><a href="/shop/2">Lehenga <span className="mobile-nav-badge">NEW</span></a></li>
-              <li><a href="/shop/3">Suit Sets</a></li>
-              <li><a href="/shop/3">Dresses</a></li>
+              <li><a href="/shop/2">Sarees</a></li>
+              <li><a href="/#dress-materials" onClick={() => setMobileMenuOpen(false)}>Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
               <li>
                 <a
@@ -1462,8 +1338,8 @@ export default function Index({
         )}
       </section>
 
-      {/* ══════════ SHOP BY OCCASION ══════════ */}
-      <ShopByOccasion />
+      {/* ══════════ SHOP BY CATEGORY WITH TABS ══════════ */}
+      <ShopByCategoryTabs />
 
       {/* ══════════ COUPONS ══════════ */}
       <Coupons />
@@ -1472,17 +1348,26 @@ export default function Index({
       <FloralDivider />
 
       {/* ══════════ SUB-CATEGORY ICONS ══════════ */}
-      <section className="subcategory-icons">
-        {SUBCATEGORIES.map((cat) => (
-          <a key={cat.name} href="#" className="subcategory-item">
-            <img src={cat.img} alt={cat.name} />
-            <span>{cat.name}</span>
-          </a>
-        ))}
+      <section style={{ background: "#fcf8f2" }}>
+        <div className="section-header">
+          <h2>
+            <SectionOrnament kind="sparkle" />
+            <span style={{ color: "#ac4024" }}>Top Trending Collections</span>
+            <SectionOrnament kind="sparkle" reverse />
+          </h2>
+        </div>
+        <div className="subcategory-icons" style={{ background: "transparent", paddingTop: 0 }}>
+          {SUBCATEGORIES.map((cat) => (
+            <a key={cat.name} href={`/${(cat as any).slug || '#'}`} className="subcategory-item">
+              <img src={cat.img} alt={cat.name} />
+              <span>{cat.name}</span>
+            </a>
+          ))}
+        </div>
       </section>
 
       {/* ══════════ NEW ARRIVALS ══════════ */}
-      <section className="new-arrivals-section">
+      <section className="new-arrivals-section" style={{ backgroundImage: "url('/elegant_indian_bg.jpg')", backgroundRepeat: "repeat" }}>
         <div className="section-header">
           <h2>
             <SectionOrnament kind="sparkle" />
@@ -1500,28 +1385,7 @@ export default function Index({
         </div>
       </section>
 
-      <FloralDivider />
 
-      {/* ══════════ SHOP BY CATEGORY (Sarees) ══════════ */}
-      <section className="shop-category-section">
-        <div className="section-header">
-          <h2 className="dark">
-            <SectionOrnament kind="lotus" />
-            Shop By Category
-            <SectionOrnament kind="lotus" reverse />
-          </h2>
-        </div>
-        <div className="product-grid">
-          {SAREE_CATEGORIES.map((cat) => (
-            <div key={cat.name} className="category-card">
-              <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
-              <img src={cat.img} alt={cat.name} className="category-card-img" />
-              <h4>{cat.name}</h4>
-              <a href="#" className="btn-details">DETAILS</a>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <FloralDivider />
 
@@ -1610,7 +1474,9 @@ export default function Index({
           {displayCelebsLook.map((product, i) => (
             <div key={i} className="celebs-card">
               <img src="/card-ornament.png" alt="" className="card-top-right-ornament" />
-              <img src={product.img} alt={`Celebs ${i + 1}`} />
+              <a href={`/${(product as any).slug || '#'}`} style={{ display: 'block', height: '100%' }}>
+                <img src={product.img} alt={`Celebs ${i + 1}`} />
+              </a>
             </div>
           ))}
         </div>
@@ -1671,20 +1537,9 @@ export default function Index({
         </div>
       </section>
 
-      <CustomerReviewsCarousel />
 
-      {/* ══════════ OUR REVIEWS ══════════ */}
-      <section className="reviews-section">
-        <h2>Our Reviews</h2>
-        <div className="review-logos-container">
-          <div className="review-logos">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google Reviews" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook Reviews" />
-            <span className="review-logo-justdial">Justdial</span>
-            <span className="review-logo-indiamart">indiamart</span>
-          </div>
-        </div>
-      </section>
+
+
 
       {/* ══════════ FOOTER ══════════ */}
       <footer className="footer-new">
@@ -1798,6 +1653,9 @@ export default function Index({
       </footer>
 
       {/* ══════════ FLOATING ELEMENTS ══════════ */}
+      <a href="/review" className="reviews-tab" style={{ textDecoration: 'none' }}>
+        <span>★</span> Reviews
+      </a>
       <a href="https://wa.me/919630504663" className="float-whatsapp" target="_blank" rel="noopener noreferrer">
         <FaWhatsapp size={28} />
       </a>
