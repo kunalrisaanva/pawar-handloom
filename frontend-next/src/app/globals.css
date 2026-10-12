@@ -1712,23 +1712,35 @@ section:has(+ .floral-divider-container) {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: #333;
+  background: #2b2b2b;
   color: #fff;
-  padding: 15px 8px;
+  padding: 16px 8px;
   writing-mode: vertical-rl;
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 2px;
   text-transform: uppercase;
   z-index: 9999;
   cursor: pointer;
-  border-radius: 4px 0 0 4px;
+  border-radius: 8px 0 0 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.reviews-tab:hover {
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding-left: 12px;
 }
 
 .reviews-tab span {
-  color: #f5c518;
-  margin-bottom: 5px;
-  font-size: 16px;
+  color: #f59e0b;
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* Scroll to top */

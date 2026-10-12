@@ -2273,8 +2273,9 @@ export default function Index({
         href="/review"
         className="reviews-tab"
         style={{ textDecoration: "none" }}
+        aria-label="Customer Reviews"
       >
-        <span>★</span> Reviews
+        <span>★</span> REVIEWS
       </a>
       <a
         href="https://wa.me/919630504663"

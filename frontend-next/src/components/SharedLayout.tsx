@@ -729,6 +729,14 @@ export default function SharedLayout({
 
       {/* ══════════ FLOATING ELEMENTS ══════════ */}
       <a
+        href="/review"
+        className="reviews-tab"
+        style={{ textDecoration: "none" }}
+        aria-label="Customer Reviews"
+      >
+        <span>★</span> REVIEWS
+      </a>
+      <a
         href="https://wa.me/919630504663"
         className="float-whatsapp"
         target="_blank"
