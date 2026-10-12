@@ -419,61 +419,82 @@ export default function ProductDetailClient({
           margin-bottom: 24px;
         }
 
-        /* Color Selection */
+        /* Color Selection - Refined Luxury Styling */
         .pd-color-section {
           margin-bottom: 24px;
         }
 
-        .pd-section-label {
-          font-size: 13px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: #5c5247;
-          margin-bottom: 10px;
+        .pd-color-header {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
+          margin-bottom: 12px;
+          font-size: 14px;
         }
 
-        .pd-color-swatches {
+        .pd-color-title {
+          color: #7d7268;
+          font-weight: 500;
+        }
+
+        .pd-color-name {
+          color: #1e1915;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+        }
+
+        .pd-color-chips {
           display: flex;
-          gap: 12px;
+          gap: 10px;
           align-items: center;
           flex-wrap: wrap;
         }
 
-        .pd-color-circle {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          cursor: pointer;
-          position: relative;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          border: 2px solid #ffffff;
-          box-shadow: 0 0 0 1px #d6cbbe;
-        }
-
-        .pd-color-circle:hover {
-          transform: scale(1.15);
-        }
-
-        .pd-color-circle.active {
-          box-shadow: 0 0 0 2.5px #a83d22;
-          transform: scale(1.12);
-        }
-
-        .pd-color-circle.active::after {
-          content: "";
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
+        .pd-color-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          padding: 7px 15px 7px 10px;
+          border-radius: 30px;
+          border: 1.5px solid #e7ded2;
           background: #ffffff;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          box-shadow: 0 0 2px rgba(0,0,0,0.5);
+          cursor: pointer;
+          font-size: 14px;
+          color: #3b3229;
+          font-weight: 500;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        .pd-color-pill:hover {
+          border-color: #a83d22;
+          background: #fdfbf8;
+          transform: translateY(-1px);
+        }
+
+        .pd-color-pill.selected {
+          border-color: #a83d22;
+          background: #faf2ee;
+          color: #a83d22;
+          font-weight: 600;
+          box-shadow: 0 3px 10px rgba(168, 61, 34, 0.12);
+        }
+
+        .pd-swatch-dot {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        .pd-check-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: #a83d22;
+          margin-left: 2px;
         }
 
         /* Quantity & Add to Cart */
@@ -959,26 +980,40 @@ export default function ProductDetailClient({
               {/* Colors Swatches */}
               {colors.length > 0 && (
                 <div className="pd-color-section">
-                  <div className="pd-section-label">
-                    <span>Available Colors:</span>
+                  <div className="pd-color-header">
+                    <span className="pd-color-title">Color:</span>
                     {selectedColor && (
-                      <span style={{ color: "#a83d22", fontWeight: 600 }}>
+                      <span className="pd-color-name">
                         {selectedColor.colour_name}
                       </span>
                     )}
                   </div>
-                  <div className="pd-color-swatches">
-                    {colors.map((c) => (
-                      <div
-                        key={c.id}
-                        className={`pd-color-circle ${
-                          selectedColor?.id === c.id ? "active" : ""
-                        }`}
-                        style={{ backgroundColor: c.colour_code }}
-                        title={c.colour_name}
-                        onClick={() => setSelectedColor(c)}
-                      />
-                    ))}
+                  <div className="pd-color-chips">
+                    {colors.map((c) => {
+                      const isSelected = selectedColor?.id === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          className={`pd-color-pill ${
+                            isSelected ? "selected" : ""
+                          }`}
+                          onClick={() => setSelectedColor(c)}
+                          aria-label={`Select color ${c.colour_name}`}
+                        >
+                          <span
+                            className="pd-swatch-dot"
+                            style={{ backgroundColor: c.colour_code }}
+                          />
+                          <span>{c.colour_name}</span>
+                          {isSelected && (
+                            <span className="pd-check-icon">
+                              <Check size={13} strokeWidth={2.5} />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
