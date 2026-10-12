@@ -287,7 +287,7 @@ const COLLECTION_MENU = [
     ],
   },
   { name: "Stoles/Dupatta", href: "/shop/4" },
-  { name: "New Arrivals", href: "/shop/6" },
+  { name: "New Arrivals", href: "/new-arrivals" },
   { name: "Best Sellers", href: "/shop/7" },
   { name: "Celebs Look", href: "/shop/8" },
 ];
@@ -1676,7 +1676,7 @@ export default function Index({
           <nav>
             <ul className="main-nav">
               <li>
-                <a href="/shop/6">New Arrival</a>
+                <a href="/new-arrivals">New Arrival</a>
               </li>
               <li>
                 <a href="/shop/7">Best Seller</a>
@@ -1775,7 +1775,7 @@ export default function Index({
               <AnimatedSearchInput />
             </div>
             <ul>
-              <li><a href="/shop/6">New Arrival</a></li>
+              <li><a href="/new-arrivals">New Arrival</a></li>
               <li><a href="/shop/7">Best Seller</a></li>
               <li><a href="#">Same Day Dispatch</a></li>
               <li><a href="/shop/2">Sarees</a></li>
@@ -1954,7 +1954,7 @@ export default function Index({
           ))}
         </div>
         <div style={{ textAlign: "center" }}>
-          <a href="/shop/6" className="btn-view-all">
+          <a href="/new-arrivals" className="btn-view-all">
             VIEW ALL
           </a>
         </div>
@@ -2213,7 +2213,7 @@ export default function Index({
             <h4>DESIGNER WEAR</h4>
             <ul>
               <li>
-                <a href="/shop/6">New Arrival</a>
+                <a href="/new-arrivals">New Arrival</a>
               </li>
               <li>
                 <a href="#">Same Day Dispatch</a>

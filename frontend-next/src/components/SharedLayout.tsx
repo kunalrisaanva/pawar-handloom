@@ -73,7 +73,7 @@ const COLLECTION_MENU = [
     ],
   },
   { name: "Stoles/Dupatta", href: "/shop/4" },
-  { name: "New Arrivals", href: "/shop/6" },
+  { name: "New Arrivals", href: "/new-arrivals" },
   { name: "Best Sellers", href: "/shop/7" },
   { name: "Celebs Look", href: "/shop/8" },
 ];
@@ -361,7 +361,7 @@ export default function SharedLayout({
           <nav>
             <ul className="main-nav">
               <li>
-                <a href="/shop/6">New Arrival</a>
+                <a href="/new-arrivals">New Arrival</a>
               </li>
               <li>
                 <a href="/shop/7">Best Seller</a>
@@ -468,7 +468,7 @@ export default function SharedLayout({
             </div>
             <ul>
               <li>
-                <a href="/shop/6">New Arrival</a>
+                <a href="/new-arrivals">New Arrival</a>
               </li>
               <li>
                 <a href="/shop/7">Best Seller</a>
@@ -622,7 +622,7 @@ export default function SharedLayout({
             <h4>DESIGNER WEAR</h4>
             <ul>
               <li>
-                <a href="/shop/6">New Arrival</a>
+                <a href="/new-arrivals">New Arrival</a>
               </li>
               <li>
                 <a href="#">Same Day Dispatch</a>
