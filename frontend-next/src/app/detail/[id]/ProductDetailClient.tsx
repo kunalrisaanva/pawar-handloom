@@ -149,7 +149,7 @@ export default function ProductDetailClient({
         .product-detail-wrapper {
           background-color: #faf7f2;
           min-height: 100vh;
-          padding: 30px 16px 80px;
+          padding: 30px 16px 90px;
           color: #2b2520;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
@@ -166,7 +166,7 @@ export default function ProductDetailClient({
           gap: 10px;
           font-size: 14px;
           color: #7d7268;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
           flex-wrap: wrap;
         }
         .pd-breadcrumb a {
@@ -206,14 +206,6 @@ export default function ProductDetailClient({
           border: 1px solid #ede3c9;
         }
 
-        @media (max-width: 992px) {
-          .pd-main-grid {
-            grid-template-columns: 1fr;
-            gap: 32px;
-            padding: 24px 20px;
-          }
-        }
-
         /* Gallery Layout */
         .pd-gallery-container {
           display: flex;
@@ -221,32 +213,16 @@ export default function ProductDetailClient({
           align-items: flex-start;
         }
 
-        @media (max-width: 640px) {
-          .pd-gallery-container {
-            flex-direction: column-reverse;
-          }
-        }
-
-        /* Thumbnails Strip (Left) */
+        /* Thumbnails Strip (Left on Desktop) */
         .pd-thumbnails-strip {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 12px;
           width: 86px;
           flex-shrink: 0;
           max-height: 580px;
           overflow-y: auto;
           scrollbar-width: thin;
-        }
-
-        @media (max-width: 640px) {
-          .pd-thumbnails-strip {
-            flex-direction: row;
-            width: 100%;
-            max-height: none;
-            overflow-x: auto;
-            padding-bottom: 6px;
-          }
         }
 
         .pd-thumbnail-item {
@@ -259,14 +235,6 @@ export default function ProductDetailClient({
           background: #fbf9f5;
           transition: all 0.2s ease;
           position: relative;
-        }
-
-        @media (max-width: 640px) {
-          .pd-thumbnail-item {
-            width: 70px;
-            height: 90px;
-            flex-shrink: 0;
-          }
         }
 
         .pd-thumbnail-item:hover {
@@ -363,19 +331,13 @@ export default function ProductDetailClient({
           letter-spacing: -0.01em;
         }
 
-        @media (max-width: 640px) {
-          .pd-product-title {
-            font-size: 26px;
-          }
-        }
-
         /* Pricing Block */
         .pd-price-row {
           display: flex;
           align-items: baseline;
           gap: 12px;
           flex-wrap: wrap;
-          padding-bottom: 20px;
+          padding-bottom: 18px;
           border-bottom: 1px solid #f2e9dc;
           margin-bottom: 20px;
         }
@@ -416,19 +378,19 @@ export default function ProductDetailClient({
           color: #554a40;
           font-size: 15px;
           line-height: 1.65;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         /* Color Selection - Refined Luxury Styling */
         .pd-color-section {
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .pd-color-header {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           font-size: 14px;
         }
 
@@ -502,14 +464,14 @@ export default function ProductDetailClient({
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
           flex-wrap: wrap;
         }
 
         .pd-qty-selector {
           display: inline-flex;
           align-items: center;
-          border: 1px solid #d4c8b6;
+          border: 1.5px solid #d4c8b6;
           border-radius: 8px;
           background: #fbf9f5;
           height: 48px;
@@ -587,7 +549,7 @@ export default function ProductDetailClient({
           border-radius: 12px;
           border: 1px solid #eee5d3;
           padding: 16px 20px;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .pd-spec-row {
@@ -596,6 +558,7 @@ export default function ProductDetailClient({
           padding: 11px 0;
           font-size: 14.5px;
           border-bottom: 1px solid #f2e9dc;
+          gap: 12px;
         }
 
         .pd-spec-row:last-child {
@@ -606,13 +569,14 @@ export default function ProductDetailClient({
           color: #2b2520;
           font-weight: 600;
           min-width: 140px;
+          flex-shrink: 0;
         }
 
         .pd-spec-value {
           color: #554a40;
           text-align: right;
           font-weight: 400;
-          max-width: 60%;
+          word-break: break-word;
         }
 
         /* Service Guarantee Row */
@@ -648,18 +612,17 @@ export default function ProductDetailClient({
           box-shadow: 0 4px 20px rgba(80, 50, 30, 0.03);
         }
 
-        @media (max-width: 640px) {
-          .pd-tabs-container {
-            padding: 24px 20px;
-          }
-        }
-
         .pd-tabs-nav {
           display: flex;
           gap: 28px;
           border-bottom: 2px solid #f2e9dc;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
           overflow-x: auto;
+          scrollbar-width: none;
+        }
+
+        .pd-tabs-nav::-webkit-scrollbar {
+          display: none;
         }
 
         .pd-tab-btn {
@@ -717,18 +680,6 @@ export default function ProductDetailClient({
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 24px;
-        }
-
-        @media (max-width: 992px) {
-          .pd-related-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 540px) {
-          .pd-related-grid {
-            grid-template-columns: 1fr;
-          }
         }
 
         .pd-related-card {
@@ -860,6 +811,276 @@ export default function ProductDetailClient({
         @keyframes slideIn {
           from { transform: translateX(50px); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ════════════════════════════════════════════════════
+           RESPONSIVE BREAKPOINTS (Tablet, Mobile, Small)
+           ════════════════════════════════════════════════════ */
+
+        /* 1. Tablet & Small Laptop (max-width: 992px) */
+        @media (max-width: 992px) {
+          .product-detail-wrapper {
+            padding: 24px 16px 85px;
+          }
+          .pd-main-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            padding: 28px 24px;
+          }
+          .pd-related-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+          }
+        }
+
+        /* 2. Tablet Portrait & Mobile (max-width: 768px) */
+        @media (max-width: 768px) {
+          .product-detail-wrapper {
+            padding: 16px 12px 95px;
+          }
+          .pd-breadcrumb {
+            font-size: 13px;
+            margin-bottom: 16px;
+            gap: 6px;
+          }
+          .pd-breadcrumb-current {
+            max-width: 180px;
+          }
+          .pd-gallery-container {
+            flex-direction: column-reverse;
+            gap: 12px;
+            width: 100%;
+          }
+          .pd-thumbnails-strip {
+            flex-direction: row;
+            width: 100%;
+            max-height: none;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+            gap: 10px;
+            scrollbar-width: none;
+          }
+          .pd-thumbnails-strip::-webkit-scrollbar {
+            display: none;
+          }
+          .pd-thumbnail-item {
+            width: 70px;
+            height: 90px;
+            flex-shrink: 0;
+            border-radius: 8px;
+          }
+          .pd-showcase-container {
+            min-height: auto;
+            max-height: 480px;
+            width: 100%;
+            border-radius: 12px;
+            aspect-ratio: 3/4;
+          }
+          .pd-showcase-img {
+            max-height: 480px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .pd-action-icon-btn {
+            width: 40px;
+            height: 40px;
+          }
+          .pd-product-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            line-height: 1.3;
+          }
+          .pd-price-row {
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+          }
+          .pd-original-price {
+            font-size: 16px;
+          }
+          .pd-final-price {
+            font-size: 24px;
+          }
+          .pd-per-piece {
+            font-size: 14px;
+          }
+          .pd-discount-badge {
+            font-size: 12px;
+            padding: 3px 8px;
+          }
+          .pd-short-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+          }
+          .pd-tabs-container {
+            padding: 22px 18px;
+            border-radius: 14px;
+            margin-top: 32px;
+          }
+          .pd-tabs-nav {
+            gap: 18px;
+            margin-bottom: 20px;
+          }
+          .pd-tab-btn {
+            font-size: 14px;
+            padding: 10px 2px 12px;
+          }
+          .pd-tab-content {
+            font-size: 14px;
+            line-height: 1.65;
+          }
+          .pd-related-section {
+            margin-top: 40px;
+          }
+          .pd-related-title {
+            font-size: 24px;
+            margin-bottom: 22px;
+          }
+        }
+
+        /* 3. Standard Mobile (max-width: 640px) */
+        @media (max-width: 640px) {
+          .pd-main-grid {
+            padding: 18px 14px;
+            gap: 20px;
+            border-radius: 14px;
+          }
+          .pd-purchase-row {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+          }
+          .pd-qty-selector {
+            height: 46px;
+            min-width: 110px;
+            flex-shrink: 0;
+          }
+          .pd-qty-btn {
+            width: 36px;
+            font-size: 16px;
+          }
+          .pd-qty-value {
+            width: 38px;
+            font-size: 15px;
+          }
+          .pd-add-to-cart-btn {
+            height: 46px;
+            min-width: 0;
+            flex: 1;
+            font-size: 13.5px;
+            padding: 0 10px;
+            gap: 6px;
+            letter-spacing: 0.02em;
+          }
+          .pd-color-section {
+            margin-bottom: 18px;
+          }
+          .pd-color-chips {
+            gap: 8px;
+          }
+          .pd-color-pill {
+            padding: 6px 12px 6px 8px;
+            font-size: 13px;
+            gap: 7px;
+          }
+          .pd-swatch-dot {
+            width: 16px;
+            height: 16px;
+          }
+          .pd-specifications-container {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+          }
+          .pd-spec-row {
+            font-size: 13px;
+            padding: 9px 0;
+            gap: 8px;
+          }
+          .pd-spec-label {
+            min-width: 110px;
+            font-size: 13px;
+          }
+          .pd-spec-value {
+            font-size: 13px;
+            max-width: 65%;
+          }
+          .pd-guarantees-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            padding-top: 12px;
+          }
+          .pd-guarantee-item {
+            font-size: 12.5px;
+          }
+          .pd-related-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+          .pd-related-card {
+            border-radius: 10px;
+          }
+          .pd-related-body {
+            padding: 12px 8px;
+          }
+          .pd-related-name {
+            font-size: 13px;
+            height: 34px;
+            line-height: 1.35;
+            margin-bottom: 4px;
+          }
+          .pd-related-price {
+            font-size: 14px;
+          }
+          .pd-floating-call {
+            bottom: 16px;
+            left: 14px;
+            padding: 8px 14px;
+            font-size: 12.5px;
+            gap: 6px;
+          }
+          .pd-floating-whatsapp {
+            bottom: 16px;
+            right: 14px;
+            width: 48px;
+            height: 48px;
+          }
+        }
+
+        /* 4. Extra Small Phones (max-width: 380px) */
+        @media (max-width: 380px) {
+          .pd-breadcrumb-current {
+            max-width: 120px;
+          }
+          .pd-thumbnail-item {
+            width: 60px;
+            height: 76px;
+          }
+          .pd-product-title {
+            font-size: 21px;
+          }
+          .pd-final-price {
+            font-size: 21px;
+          }
+          .pd-floating-call .pd-call-text {
+            display: none;
+          }
+          .pd-floating-call {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+          }
+          .pd-floating-whatsapp {
+            width: 44px;
+            height: 44px;
+          }
         }
       `}</style>
 
@@ -1269,7 +1490,7 @@ export default function ProductDetailClient({
         aria-label="Call Now"
       >
         <Phone size={16} fill="currentColor" />
-        <span>Call Now</span>
+        <span className="pd-call-text">Call Now</span>
       </a>
 
       {/* Floating WhatsApp Button (as in screenshot) */}
