@@ -728,8 +728,8 @@ section:has(+ .floral-divider-container) {
 }
 
 .subcategory-item img {
-  width: 80px;
-  height: 100px;
+  width: 250px;
+  height: auto;
   object-fit: contain;
 }
 
