@@ -370,7 +370,6 @@ export default function SharedLayout({
                 <a href="#">Same Day Dispatch</a>
               </li>
               <li>
-                <span className="nav-badge-new">(NEW)</span>
                 <a href="/shop/2">Lehenga</a>
               </li>
               <li>
@@ -384,7 +383,7 @@ export default function SharedLayout({
               </li>
               <li>
                 <a href="#">
-                  Shop by Collection{" "}
+                  Shop by Categories{" "}
                   <ChevronDown size={14} style={{ marginTop: 2 }} />
                 </a>
                 <ul className="dropdown">
