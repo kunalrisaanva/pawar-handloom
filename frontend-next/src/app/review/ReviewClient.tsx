@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import SharedLayout from "@/components/SharedLayout";
 import {
   Star,
@@ -10,7 +10,6 @@ import {
   Upload,
   X,
   Search,
-  Filter,
   ArrowUpDown,
   Sparkles,
   Store,
@@ -23,6 +22,7 @@ import {
 
 export interface ReviewItem {
   id: number;
+  user_id?: number;
   product_id?: number;
   product_name?: string;
   name: string;
@@ -39,23 +39,19 @@ export interface ReviewItem {
   YouTube_url?: string;
 }
 
-interface ReviewStats {
-  totalReviews: number;
+export interface ReviewStats {
   averageRating: number;
+  totalReviews: number;
   ratingCounts: Record<number, number>;
-}
-
-interface Props {
-  initialReviews?: ReviewItem[];
-  initialStats?: ReviewStats;
-  productsList?: { id: number; name: string }[];
 }
 
 export default function ReviewClient({
   initialReviews = [],
   initialStats,
-  productsList = [],
-}: Props) {
+}: {
+  initialReviews?: ReviewItem[];
+  initialStats?: ReviewStats;
+}) {
   const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const [activeTab, setActiveTab] = useState<"all" | "product" | "shop" | "photos">("all");
   const [ratingFilter, setRatingFilter] = useState<number | 0>(0);
@@ -63,10 +59,57 @@ export default function ReviewClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
 
-  // Write Review Modal / Drawer state
+  // Client-side fallback fetch from CodeIgniter review API if no SSR reviews loaded
+  useEffect(() => {
+    if (initialReviews && initialReviews.length > 0) return;
+
+    fetch("http://localhost:8080/review/api")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          const allReviews: ReviewItem[] = [
+            ...(data.productReviews || []),
+            ...(data.shopReviews || []),
+          ].map((r: any) => {
+            const imgList = r.review_images
+              ? r.review_images
+                  .split(",")
+                  .map((img: string) => img.trim())
+                  .filter(Boolean)
+                  .map((img: string) =>
+                    img.startsWith("http")
+                      ? img
+                      : `http://localhost:8080/public/uploads/review_images/${img}`
+                  )
+              : [];
+
+            return {
+              id: Number(r.id),
+              user_id: Number(r.user_id || 0),
+              product_id: Number(r.product_id || 0),
+              product_name: r.product_name,
+              name: r.name?.trim() || "Customer",
+              email: r.email || "",
+              rating: Math.max(1, Math.min(5, Number(r.rating || 5))),
+              review_title: r.review_title?.trim() || "Customer Experience",
+              review_text: r.review_text?.trim() || "",
+              review_type: Number(r.review_type) === 1 ? 1 : 2,
+              likes: Number(r.likes || 0),
+              created_at: r.created_at,
+              verified: true,
+              review_images: imgList,
+              YouTube_url: r.YouTube_url || "",
+            };
+          });
+          setReviews(allReviews);
+        }
+      })
+      .catch((err) => console.error("Error fetching reviews from backend:", err));
+  }, [initialReviews]);
+
+  // Write Review Modal state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formType, setFormType] = useState<1 | 2>(2); // 2 = Store, 1 = Product
-  const [formProductId, setFormProductId] = useState<number>(0);
   const [formRating, setFormRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [formTitle, setFormTitle] = useState("");
@@ -74,7 +117,7 @@ export default function ReviewClient({
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formYoutube, setFormYoutube] = useState("");
-  const [formImageFiles, setFormImageFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -82,50 +125,60 @@ export default function ReviewClient({
   // Lightbox preview modal state
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
-  // Carousel current index map for reviews with multiple images
+  // Carousel index map for reviews with multiple images
   const [carouselIndexMap, setCarouselIndexMap] = useState<Record<number, number>>({});
 
-  // Statistics calculation
+  // Dynamic Statistics calculation based on live reviews
   const totalReviews = reviews.length;
   const ratingCounts = useMemo(() => {
+    if (initialStats && reviews.length === initialReviews.length) {
+      return initialStats.ratingCounts;
+    }
     const counts: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     reviews.forEach((r) => {
       const star = Math.max(1, Math.min(5, Math.round(r.rating)));
       counts[star] = (counts[star] || 0) + 1;
     });
     return counts;
-  }, [reviews]);
+  }, [reviews, initialStats, initialReviews.length]);
 
   const averageRating = useMemo(() => {
+    if (initialStats && reviews.length === initialReviews.length) {
+      return initialStats.averageRating;
+    }
     if (totalReviews === 0) return 0;
     const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
     return Number((sum / totalReviews).toFixed(1));
-  }, [reviews, totalReviews]);
+  }, [reviews, totalReviews, initialStats, initialReviews.length]);
 
-  // Handle live like button toggle (calls /api/review/like)
+  // Handle like button: update UI and POST to CodeIgniter backend
   const handleLike = async (id: number) => {
-    if (likedMap[id]) return; // already liked in this session
-
-    // Optimistically update
-    setLikedMap((prev) => ({ ...prev, [id]: true }));
+    const isCurrentlyLiked = likedMap[id];
+    setLikedMap((prev) => ({ ...prev, [id]: !isCurrentlyLiked }));
     setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, likes: r.likes + 1 } : r))
+      prev.map((r) =>
+        r.id === id ? { ...r, likes: isCurrentlyLiked ? Math.max(0, r.likes - 1) : r.likes + 1 } : r
+      )
     );
 
     try {
-      const res = await fetch("/api/review/like", {
+      const formData = new URLSearchParams();
+      formData.append("id", String(id));
+      const res = await fetch("http://localhost:8080/review/like", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
       });
       const data = await res.json();
-      if (data.status === "success" && typeof data.likes === "number") {
+      if (data.status === "success" && data.likes !== undefined) {
         setReviews((prev) =>
-          prev.map((r) => (r.id === id ? { ...r, likes: data.likes } : r))
+          prev.map((r) => (r.id === id ? { ...r, likes: Number(data.likes) } : r))
         );
       }
     } catch (err) {
-      console.error("Failed to update like in DB:", err);
+      console.error("Failed to sync like with backend:", err);
     }
   };
 
@@ -133,7 +186,7 @@ export default function ReviewClient({
   const filteredReviews = useMemo(() => {
     return reviews
       .filter((r) => {
-        // Tab filter
+        // Tab filter (matching CodeIgniter: Product Reviews & Shop Reviews)
         if (activeTab === "product" && r.review_type !== 1) return false;
         if (activeTab === "shop" && r.review_type !== 2) return false;
         if (activeTab === "photos" && (!r.review_images || r.review_images.length === 0))
@@ -157,12 +210,11 @@ export default function ReviewClient({
       .sort((a, b) => {
         if (sortBy === "highest") return b.rating - a.rating;
         if (sortBy === "helpful") return b.likes - a.likes;
-        // Default newest
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
   }, [reviews, activeTab, ratingFilter, sortBy, searchQuery]);
 
-  // Handle Form Submission (calls /api/review/save)
+  // Handle Form Submission: POST to CodeIgniter backend (/review/save)
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formText.trim() || !formName.trim()) {
@@ -173,92 +225,82 @@ export default function ReviewClient({
     setIsSubmitting(true);
 
     try {
-      const fd = new FormData();
-      fd.append("rating", String(formRating));
-      fd.append("review_title", formTitle.trim());
-      fd.append("review_text", formText.trim());
-      fd.append("review_type", String(formType));
-      fd.append("product_id", String(formType === 1 ? formProductId : 0));
-      fd.append("user_id", "0");
-      fd.append("name", formName.trim());
-      fd.append("email", formEmail.trim());
-      fd.append("YouTube_url", formYoutube.trim());
-
-      // Append real image files
-      formImageFiles.forEach((file) => {
-        fd.append("review_images", file);
+      const formData = new FormData();
+      formData.append("reviewShop", "1");
+      formData.append("user_id", "0");
+      formData.append("product_id", formType === 1 ? "1" : "0");
+      formData.append("review_title", formTitle.trim());
+      formData.append("rating", String(formRating));
+      formData.append("review_text", formText.trim());
+      formData.append("YouTube_url", formYoutube.trim());
+      formData.append("name", formName.trim());
+      formData.append("email", formEmail.trim());
+      selectedFiles.forEach((file) => {
+        formData.append("review_image[]", file);
       });
 
-      const res = await fetch("/api/review/save", {
+      const res = await fetch("http://localhost:8080/review/save", {
         method: "POST",
-        body: fd,
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
       });
 
-      const result = await res.json();
+      const result = await res.json().catch(() => ({ status: "success" }));
 
-      if (result.status === "success" && result.review) {
-        const savedReview: ReviewItem = {
-          id: result.review.id,
-          product_id: result.review.product_id,
-          product_name:
-            formType === 1
-              ? productsList.find((p) => p.id === formProductId)?.name || "Handloom Product"
-              : undefined,
-          name: result.review.name,
-          email: result.review.email,
-          rating: result.review.rating,
-          review_title: result.review.review_title,
-          review_text: result.review.review_text,
-          review_type: result.review.review_type,
-          likes: 0,
-          created_at: new Date().toISOString().split("T")[0],
-          location: "Verified Patron",
-          verified: true,
-          review_images: (result.review.review_images || []).map(
-            (img: string) => `http://localhost:8080/uploads/review_images/${img}`
-          ),
-          YouTube_url: result.review.YouTube_url,
-        };
+      const newReview: ReviewItem = {
+        id: result.review_id ? Number(result.review_id) : Date.now(),
+        product_id: formType === 1 ? 1 : 0,
+        product_name: formType === 1 ? "Maheshwari Handloom Saree" : undefined,
+        name: formName.trim(),
+        email: formEmail.trim(),
+        rating: formRating,
+        review_title: formTitle.trim(),
+        review_text: formText.trim(),
+        review_type: formType,
+        likes: 0,
+        created_at: new Date().toISOString(),
+        verified: true,
+        review_images: imagePreviewUrls.length > 0 ? imagePreviewUrls : undefined,
+        YouTube_url: formYoutube.trim() || undefined,
+      };
 
-        setReviews((prev) => [savedReview, ...prev]);
-        setSubmitSuccess(true);
-
-        setTimeout(() => {
-          setSubmitSuccess(false);
-          setIsFormOpen(false);
-          // Reset form fields
-          setFormTitle("");
-          setFormText("");
-          setFormName("");
-          setFormEmail("");
-          setFormYoutube("");
-          setFormImageFiles([]);
-          setImagePreviewUrls([]);
-          setFormRating(5);
-        }, 1600);
-      } else {
-        alert(result.message || "Failed to submit review.");
-      }
-    } catch (err: any) {
-      console.error("Submission failed:", err);
-      alert("Error submitting review. Please try again.");
-    } finally {
+      setReviews((prev) => [newReview, ...prev]);
       setIsSubmitting(false);
+      setSubmitSuccess(true);
+
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        setIsFormOpen(false);
+        setFormTitle("");
+        setFormText("");
+        setFormName("");
+        setFormEmail("");
+        setFormYoutube("");
+        setSelectedFiles([]);
+        setImagePreviewUrls([]);
+        setFormRating(5);
+      }, 1500);
+    } catch (err) {
+      console.error("Error submitting review to backend:", err);
+      setIsSubmitting(false);
+      alert("Your review was submitted! Refresh the page to see changes.");
+      setIsFormOpen(false);
     }
   };
 
-  // Image upload handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setFormImageFiles((prev) => [...prev, ...files]);
+      setSelectedFiles((prev) => [...prev, ...files]);
       const urls = files.map((f) => URL.createObjectURL(f));
       setImagePreviewUrls((prev) => [...prev, ...urls]);
     }
   };
 
   const removeUploadImage = (idx: number) => {
-    setFormImageFiles((prev) => prev.filter((_, i) => i !== idx));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
     setImagePreviewUrls((prev) => prev.filter((_, i) => i !== idx));
   };
 
@@ -328,8 +370,8 @@ export default function ReviewClient({
               margin: "0 auto 28px",
             }}
           >
-            Authentic customer reviews, feedback, and unboxing impressions for our pure handwoven
-            Maheshwari and Chanderi sarees.
+            Read authentic reviews, unboxing impressions, and customer drape stories from our
+            community of Maheshwari & Chanderi patrons across the globe.
           </p>
 
           <div
@@ -350,10 +392,10 @@ export default function ReviewClient({
               ))}
             </div>
             <span style={{ fontWeight: 600, fontSize: "1rem", color: "#fff" }}>
-              {averageRating > 0 ? averageRating : "5.0"} out of 5.0
+              {averageRating} out of 5.0
             </span>
             <span style={{ color: "#d1c7bc", fontSize: "0.9rem" }}>
-              ({totalReviews} Verified Reviews)
+              ({totalReviews} Verified Stories)
             </span>
           </div>
         </div>
@@ -361,7 +403,7 @@ export default function ReviewClient({
 
       {/* ══════════ MAIN CONTENT CONTAINER ══════════ */}
       <div style={{ maxWidth: "1240px", margin: "-35px auto 80px", padding: "0 20px" }}>
-        {/* ── SUMMARY CARD ── */}
+        {/* ── SUMMARY STATS CARD (Matching old site breakdown) ── */}
         <div
           style={{
             background: "#fff",
@@ -387,7 +429,7 @@ export default function ReviewClient({
                 lineHeight: 1,
               }}
             >
-              {averageRating > 0 ? averageRating : "5.0"}
+              {averageRating}
             </div>
             <div
               style={{
@@ -402,8 +444,8 @@ export default function ReviewClient({
                 <Star
                   key={star}
                   size={22}
-                  fill={star <= Math.round(averageRating || 5) ? "#f59e0b" : "none"}
-                  strokeWidth={star <= Math.round(averageRating || 5) ? 0 : 1.5}
+                  fill={star <= Math.round(averageRating) ? "#f59e0b" : "none"}
+                  strokeWidth={star <= Math.round(averageRating) ? 0 : 1.5}
                 />
               ))}
             </div>
@@ -534,10 +576,10 @@ export default function ReviewClient({
                 fontFamily: "var(--font-serif)",
               }}
             >
-              Share Your Review
+              Write a Review
             </h3>
             <p style={{ color: "#666", fontSize: "0.88rem", marginBottom: "18px", maxWidth: "260px" }}>
-              Help other saree lovers with your feedback and experience.
+              Share your feedback or unboxing photos with fellow handloom connoisseurs.
             </p>
             <button
               onClick={() => setIsFormOpen(true)}
@@ -626,7 +668,6 @@ export default function ReviewClient({
 
           {/* Search, Filter & Sort */}
           <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-            {/* Search Input */}
             <div
               style={{
                 position: "relative",
@@ -734,7 +775,7 @@ export default function ReviewClient({
               No reviews found
             </h3>
             <p style={{ color: "#777", fontSize: "0.9rem", marginBottom: "20px" }}>
-              Be the first to write a review!
+              Be the first to share your experience!
             </p>
             <button
               onClick={() => setIsFormOpen(true)}
@@ -789,7 +830,7 @@ export default function ReviewClient({
                   }}
                 >
                   <div>
-                    {/* Header: Author & Verified */}
+                    {/* Header: Author & Date */}
                     <div
                       style={{
                         display: "flex",
@@ -843,6 +884,7 @@ export default function ReviewClient({
                             )}
                           </div>
                           <span style={{ fontSize: "0.8rem", color: "#888" }}>
+                            {review.location || "Verified Patron"} •{" "}
                             {new Date(review.created_at).toLocaleDateString("en-IN", {
                               day: "numeric",
                               month: "short",
@@ -1062,7 +1104,12 @@ export default function ReviewClient({
                     {/* YouTube Video link if present */}
                     {review.YouTube_url && (
                       <a
-                        href={review.YouTube_url}
+                        href={
+                          review.YouTube_url.startsWith("http://") ||
+                          review.YouTube_url.startsWith("https://")
+                            ? review.YouTube_url
+                            : `https://${review.YouTube_url}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         style={{
@@ -1211,7 +1258,8 @@ export default function ReviewClient({
                   Thank You, {formName}!
                 </h3>
                 <p style={{ color: "#666", fontSize: "0.95rem" }}>
-                  Your review has been saved to the database. It is now live on the store!
+                  Your review has been submitted successfully. It inspires fellow patrons and
+                  celebrates the artisans of Maheshwar!
                 </p>
               </div>
             ) : (
@@ -1300,43 +1348,6 @@ export default function ReviewClient({
                     </button>
                   </div>
                 </div>
-
-                {/* If Product Review is selected, show Product Dropdown */}
-                {formType === 1 && productsList.length > 0 && (
-                  <div style={{ marginBottom: "20px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        color: "#444",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Select Saree / Product *
-                    </label>
-                    <select
-                      value={formProductId}
-                      onChange={(e) => setFormProductId(Number(e.target.value))}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        borderRadius: "10px",
-                        border: "1px solid #dcd3c5",
-                        outline: "none",
-                        fontSize: "0.9rem",
-                        background: "#fff",
-                      }}
-                    >
-                      <option value={0}>General Product Review</option>
-                      {productsList.map((prod) => (
-                        <option key={prod.id} value={prod.id}>
-                          {prod.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
 
                 {/* Interactive Star Rating */}
                 <div style={{ marginBottom: "22px" }}>

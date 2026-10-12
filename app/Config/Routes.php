@@ -68,9 +68,10 @@ $routes->get('/UserOrders', 'frontendController\HomeController::userOrders');
 $routes->get('/order-details/(:any)', 'frontendController\HomeController::orderDetails/$1');
 //Review
 $routes->get('/Review', 'frontendController\ReviewController::reviewPage');
+$routes->match(['get', 'options'], 'review/api', 'frontendController\ReviewController::apiGetReviews');
 // Save review (form POST)
-$routes->post('/review/save', 'frontendController\ReviewController::saveReview');
-$routes->post('/review/like', 'frontendController\ReviewController::like');
+$routes->match(['post', 'options'], 'review/save', 'frontendController\ReviewController::saveReview');
+$routes->match(['post', 'options'], 'review/like', 'frontendController\ReviewController::like');
 
 // Search Product 
 $routes->post('search', 'frontendController\SearchController::ajaxSearch');
