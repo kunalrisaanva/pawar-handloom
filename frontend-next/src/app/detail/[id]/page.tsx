@@ -69,6 +69,23 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       [product.category, product.id]
     )) as any;
 
+    // Fetch reviews for this product
+    let reviewRows: any[] = [];
+    try {
+      const [rRows] = (await pool.query(
+        `SELECT r.*, GROUP_CONCAT(ri.review_image) as review_images
+         FROM tbl_review r
+         LEFT JOIN tbl_review_image ri ON ri.review_id = r.id AND ri.product_id = r.product_id
+         WHERE r.product_id = ? AND r.status = 1 AND r.is_deleted = 1
+         GROUP BY r.id
+         ORDER BY r.created_at DESC`,
+        [product.id]
+      )) as any;
+      reviewRows = rRows || [];
+    } catch (rErr) {
+      console.error("Error fetching reviews:", rErr);
+    }
+
     // Pass to client component
     return (
       <SharedLayout>
@@ -78,6 +95,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           colors={colorRows || []}
           categoryName={categoryName}
           relatedProducts={relatedRows || []}
+          initialReviews={reviewRows}
         />
       </SharedLayout>
     );

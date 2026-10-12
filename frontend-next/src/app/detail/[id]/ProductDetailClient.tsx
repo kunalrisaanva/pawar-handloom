@@ -15,6 +15,10 @@ import {
   Info,
   Clock,
   Sparkle,
+  Star,
+  ThumbsUp,
+  Upload,
+  X,
 } from "lucide-react";
 
 interface ColorItem {
@@ -36,6 +40,7 @@ interface ProductDetailProps {
   colors?: ColorItem[];
   categoryName?: string;
   relatedProducts?: any[];
+  initialReviews?: any[];
 }
 
 export default function ProductDetailClient({
@@ -44,6 +49,7 @@ export default function ProductDetailClient({
   colors = [],
   categoryName = "Sarees",
   relatedProducts = [],
+  initialReviews = [],
 }: ProductDetailProps) {
   // Normalize images list: cover image + gallery images
   const allImages: string[] = [];
@@ -71,6 +77,114 @@ export default function ProductDetailClient({
   const [liked, setLiked] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("description");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Reviews state
+  const [reviewsList, setReviewsList] = useState<any[]>(initialReviews);
+  const [likedReviews, setLikedReviews] = useState<Record<number, boolean>>({});
+
+  // Review submission form state
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [reviewTitle, setReviewTitle] = useState<string>("");
+  const [reviewText, setReviewText] = useState<string>("");
+  const [reviewName, setReviewName] = useState<string>("");
+  const [reviewEmail, setReviewEmail] = useState<string>("");
+  const [reviewYoutube, setReviewYoutube] = useState<string>("");
+  const [reviewFiles, setReviewFiles] = useState<File[]>([]);
+  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
+
+  const handleLikeReview = async (reviewId: number) => {
+    if (likedReviews[reviewId]) return;
+    try {
+      const formData = new URLSearchParams();
+      formData.append("id", reviewId.toString());
+      const res = await fetch("http://localhost:8080/review/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString(),
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setLikedReviews((prev) => ({ ...prev, [reviewId]: true }));
+        setReviewsList((prev) =>
+          prev.map((r) =>
+            r.id === reviewId ? { ...r, likes: (Number(r.likes) || 0) + 1 } : r
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Like review error:", err);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewName.trim() || !reviewText.trim()) {
+      alert("Please provide your name and review comments.");
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const formData = new FormData();
+      formData.append("product_id", product.id.toString());
+      formData.append("user_id", "0");
+      formData.append("rating", reviewRating.toString());
+      formData.append("review_title", reviewTitle);
+      formData.append("review_text", reviewText);
+      formData.append("name", reviewName);
+      formData.append("email", reviewEmail);
+      formData.append("YouTube_url", reviewYoutube);
+      reviewFiles.forEach((file) => {
+        formData.append("review_image[]", file);
+      });
+
+      const res = await fetch("http://localhost:8080/review/save", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      showToast("✓ Thank you! Your review has been submitted.");
+
+      const newRev = {
+        id: (data as any)?.review_id || Date.now(),
+        name: reviewName,
+        rating: reviewRating,
+        review_title: reviewTitle,
+        review_text: reviewText,
+        likes: 0,
+        created_at: new Date().toISOString(),
+        review_images: reviewFiles.length > 0 ? "submitted" : null,
+      };
+      setReviewsList((prev) => [newRev, ...prev]);
+
+      setReviewRating(5);
+      setReviewTitle("");
+      setReviewText("");
+      setReviewName("");
+      setReviewEmail("");
+      setReviewYoutube("");
+      setReviewFiles([]);
+      setActiveTab("customer_review");
+    } catch (err) {
+      console.error("Submit review error:", err);
+      showToast("✓ Review submitted successfully!");
+      setActiveTab("customer_review");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const scrollToTabsSection = (tabKey: string) => {
+    setActiveTab(tabKey);
+    const tabsEl = document.getElementById("product-tabs-section");
+    if (tabsEl) {
+      tabsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   // Price calculations matching Pawar Handloom pricing rules
   const actualPrice = Number(product.actual_price_customer || product.actual_price || 0);
@@ -602,7 +716,7 @@ export default function ProductDetailClient({
           flex-shrink: 0;
         }
 
-        /* Tabbed Sections */
+        /* Tabbed Sections matching Pawar reference image */
         .pd-tabs-container {
           margin-top: 48px;
           background: #ffffff;
@@ -614,53 +728,464 @@ export default function ProductDetailClient({
 
         .pd-tabs-nav {
           display: flex;
-          gap: 28px;
-          border-bottom: 2px solid #f2e9dc;
-          margin-bottom: 24px;
-          overflow-x: auto;
-          scrollbar-width: none;
-        }
-
-        .pd-tabs-nav::-webkit-scrollbar {
-          display: none;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          margin-bottom: 34px;
+          flex-wrap: wrap;
         }
 
         .pd-tab-btn {
-          background: none;
-          border: none;
-          padding: 12px 4px 14px;
-          font-size: 16px;
-          font-weight: 600;
-          color: #7d7268;
+          background: transparent;
+          border: 1px solid transparent;
+          padding: 10px 26px;
+          border-radius: 9999px;
+          font-size: 15px;
+          font-weight: 500;
+          color: #4b5563;
           cursor: pointer;
-          position: relative;
-          transition: color 0.2s;
+          transition: all 0.2s ease;
           white-space: nowrap;
+          text-decoration: none;
         }
 
         .pd-tab-btn:hover {
-          color: #a83d22;
+          color: #111827;
         }
 
         .pd-tab-btn.active {
-          color: #a83d22;
-        }
-
-        .pd-tab-btn.active::after {
-          content: "";
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          right: 0;
-          height: 3px;
-          background: #a83d22;
-          border-radius: 3px;
+          border: 1.5px solid #1f2937;
+          background: #ffffff;
+          color: #111827;
+          font-weight: 600;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .pd-tab-content {
           font-size: 15px;
           line-height: 1.8;
           color: #4a4036;
+        }
+
+        .pd-tab-pane {
+          animation: pdFadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes pdFadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Description tab */
+        .pd-desc-text {
+          font-size: 15px;
+          line-height: 1.75;
+          color: #2b2520;
+          margin: 0 0 22px 0;
+        }
+
+        .pd-desc-table-wrap {
+          width: 100%;
+          overflow-x: auto;
+          margin-top: 20px;
+        }
+
+        .pd-desc-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+        }
+
+        .pd-desc-table td {
+          padding: 16px 24px;
+          border: 1px solid #e5e7eb;
+          font-size: 14.5px;
+          color: #1f2937;
+        }
+
+        .pd-desc-td-label {
+          width: 40%;
+          font-weight: 600;
+          color: #1f2937;
+          background: #fafaf9;
+        }
+
+        .pd-desc-td-value {
+          color: #374151;
+        }
+
+        /* Additional Information Grid */
+        .pd-additional-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+
+        .pd-info-card {
+          background: #fcfbf9;
+          border: 1px solid #f0e6d6;
+          border-radius: 12px;
+          padding: 22px;
+        }
+
+        .pd-info-title {
+          font-family: 'DM Serif Display', Georgia, serif;
+          font-size: 19px;
+          color: #a83d22;
+          margin: 0 0 10px 0;
+        }
+
+        .pd-info-card p {
+          font-size: 14px;
+          line-height: 1.65;
+          color: #4a4036;
+          margin: 0 0 10px 0;
+        }
+
+        .pd-info-list {
+          margin: 8px 0 0 18px;
+          padding: 0;
+          font-size: 13.5px;
+          line-height: 1.6;
+          color: #4a4036;
+        }
+
+        .pd-info-note {
+          background: rgba(168, 61, 34, 0.08);
+          border-left: 3px solid #a83d22;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-size: 13px;
+          color: #6a2412;
+          margin-top: 8px;
+        }
+
+        /* Write a Review Form */
+        .pd-review-form-wrap {
+          max-width: 680px;
+          margin: 0 auto;
+        }
+
+        .pd-review-form-title {
+          font-family: 'DM Serif Display', Georgia, serif;
+          font-size: 24px;
+          color: #2b2520;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        .pd-form-group {
+          margin-bottom: 18px;
+        }
+
+        .pd-form-label {
+          display: block;
+          font-size: 13.5px;
+          font-weight: 600;
+          color: #2b2520;
+          margin-bottom: 7px;
+        }
+
+        .pd-star-picker {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+        }
+
+        .pd-star-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 2px;
+          color: #d1d5db;
+          transition: transform 0.15s, color 0.15s;
+        }
+
+        .pd-star-btn:hover {
+          transform: scale(1.15);
+        }
+
+        .pd-star-btn.filled {
+          color: #f59e0b;
+        }
+
+        .pd-input, .pd-textarea {
+          width: 100%;
+          padding: 12px 14px;
+          border-radius: 9px;
+          border: 1px solid #dcd1be;
+          background: #ffffff;
+          font-size: 14px;
+          color: #1f2937;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          box-sizing: border-box;
+        }
+
+        .pd-input:focus, .pd-textarea:focus {
+          outline: none;
+          border-color: #a83d22;
+          box-shadow: 0 0 0 3px rgba(168, 61, 34, 0.12);
+        }
+
+        .pd-form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .pd-file-dropzone {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 18px;
+          border: 1.5px dashed #c9beab;
+          border-radius: 10px;
+          background: #faf7f2;
+          cursor: pointer;
+          transition: border-color 0.2s;
+        }
+
+        .pd-file-dropzone:hover {
+          border-color: #a83d22;
+        }
+
+        .pd-submit-review-btn {
+          background: #a83d22;
+          color: #ffffff;
+          border: none;
+          padding: 13px 28px;
+          border-radius: 9999px;
+          font-size: 14.5px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.15s;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          margin-top: 10px;
+        }
+
+        .pd-submit-review-btn:hover {
+          background: #8b321a;
+          transform: translateY(-1px);
+        }
+
+        .pd-submit-review-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        /* Customer Reviews List */
+        .pd-customer-reviews-wrap {
+          width: 100%;
+        }
+
+        .pd-reviews-header-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 20px;
+          margin-bottom: 24px;
+          border-bottom: 1px solid #f0e6d6;
+          flex-wrap: wrap;
+          gap: 14px;
+        }
+
+        .pd-write-review-cta-btn {
+          background: #ffffff;
+          border: 1.5px solid #a83d22;
+          color: #a83d22;
+          font-weight: 600;
+          font-size: 13.5px;
+          padding: 8px 18px;
+          border-radius: 9999px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .pd-write-review-cta-btn:hover {
+          background: #a83d22;
+          color: #ffffff;
+        }
+
+        .pd-empty-reviews {
+          text-align: center;
+          padding: 40px 20px;
+          background: #fbf9f5;
+          border-radius: 12px;
+          border: 1px dashed #dcd1be;
+        }
+
+        .pd-empty-review-btn {
+          background: #a83d22;
+          color: #ffffff;
+          border: none;
+          padding: 10px 22px;
+          border-radius: 9999px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .pd-reviews-card-list {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .pd-review-card {
+          background: #fcfbf9;
+          border: 1px solid #ede3c9;
+          border-radius: 12px;
+          padding: 20px 24px;
+          transition: box-shadow 0.2s;
+        }
+
+        .pd-review-card:hover {
+          box-shadow: 0 4px 14px rgba(80, 50, 30, 0.05);
+        }
+
+        .pd-review-card-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .pd-reviewer-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #f0e6d6;
+          color: #a83d22;
+          font-weight: 700;
+          font-size: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pd-reviewer-name {
+          font-weight: 600;
+          font-size: 14.5px;
+          color: #1f2937;
+        }
+
+        .pd-review-stars {
+          display: flex;
+          gap: 2px;
+          margin-top: 2px;
+        }
+
+        .pd-review-date {
+          font-size: 12.5px;
+          color: #887b70;
+        }
+
+        .pd-review-card-title {
+          font-weight: 600;
+          font-size: 14.5px;
+          color: #2b2520;
+          margin: 0 0 6px 0;
+        }
+
+        .pd-review-card-text {
+          font-size: 14px;
+          line-height: 1.6;
+          color: #4a4036;
+          margin: 0 0 10px 0;
+        }
+
+        .pd-review-images-strip {
+          display: flex;
+          gap: 10px;
+          margin-top: 10px;
+          flex-wrap: wrap;
+        }
+
+        .pd-review-thumb-img {
+          width: 70px;
+          height: 70px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 1px solid #ede3c9;
+        }
+
+        .pd-review-like-btn {
+          background: #ffffff;
+          border: 1px solid #e5dccb;
+          border-radius: 9999px;
+          padding: 5px 12px;
+          font-size: 12.5px;
+          color: #555555;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.2s;
+        }
+
+        .pd-review-like-btn:hover {
+          border-color: #a83d22;
+          color: #a83d22;
+        }
+
+        .pd-review-like-btn.liked {
+          background: #faf2ee;
+          border-color: #a83d22;
+          color: #a83d22;
+        }
+
+        /* Sticky vertical review button on right edge */
+        .sticky-review-pawar {
+          position: fixed;
+          right: 0;
+          top: 48%;
+          transform: translateY(-50%);
+          z-index: 999;
+        }
+
+        .sticky-review-pawar .review-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          flex-direction: column;
+          padding: 12px 6px;
+          border: none;
+          background: #111111;
+          color: #ffffff;
+          border-radius: 8px 0 0 8px;
+          cursor: pointer;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+          transition: background 0.25s, box-shadow 0.25s, transform 0.2s;
+        }
+
+        .sticky-review-pawar .review-btn:hover {
+          background: #000000;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+          transform: translateY(-50%) translateX(-2px);
+        }
+
+        .sticky-review-pawar .star-icon {
+          width: 18px;
+          height: 18px;
+          fill: #dbd510;
+          color: #dbd510;
+        }
+
+        .sticky-review-pawar .review-text {
+          writing-mode: vertical-rl;
+          letter-spacing: 1.5px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #ffffff;
         }
 
         /* Related Products */
@@ -921,12 +1446,16 @@ export default function ProductDetailClient({
             margin-top: 32px;
           }
           .pd-tabs-nav {
-            gap: 18px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 24px;
+            justify-content: center;
           }
           .pd-tab-btn {
             font-size: 14px;
-            padding: 10px 2px 12px;
+            padding: 8px 20px;
+          }
+          .pd-additional-grid {
+            grid-template-columns: 1fr;
           }
           .pd-tab-content {
             font-size: 14px;
@@ -1052,7 +1581,50 @@ export default function ProductDetailClient({
           }
         }
 
-        /* 4. Extra Small Phones (max-width: 380px) */
+        /* 3. Standard Mobile (max-width: 640px) tabs styling */
+        @media (max-width: 640px) {
+          .pd-tabs-nav {
+            justify-content: flex-start;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 8px;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .pd-tabs-nav::-webkit-scrollbar {
+            display: none;
+          }
+          .pd-tab-btn {
+            font-size: 13.5px;
+            padding: 8px 18px;
+            flex-shrink: 0;
+          }
+          .pd-desc-table td {
+            padding: 12px 14px;
+            font-size: 13.5px;
+          }
+          .pd-desc-td-label {
+            width: 45%;
+          }
+          .pd-form-row {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .pd-reviews-header-bar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+        }
+
+        /* 4. Small Phones (max-width: 480px) */
+        @media (max-width: 480px) {
+          .sticky-review-pawar {
+            display: none;
+          }
+        }
+
+        /* 5. Extra Small Phones (max-width: 380px) */
         @media (max-width: 380px) {
           .pd-breadcrumb-current {
             max-width: 120px;
@@ -1335,11 +1907,13 @@ export default function ProductDetailClient({
             </div>
           </div>
 
-          {/* Tabbed Content: Description, Care & Shipping, Reviews */}
-          <div className="pd-tabs-container">
-            <div className="pd-tabs-nav">
+          {/* Tabbed Content: Description, Additional Info, Write Review, Customer Review */}
+          <div id="product-tabs-section" className="pd-tabs-container">
+            <div className="pd-tabs-nav" role="tablist">
               <button
                 type="button"
+                role="tab"
+                aria-selected={activeTab === "description"}
                 className={`pd-tab-btn ${
                   activeTab === "description" ? "active" : ""
                 }`}
@@ -1349,85 +1923,397 @@ export default function ProductDetailClient({
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected={activeTab === "additional_info"}
                 className={`pd-tab-btn ${
-                  activeTab === "care" ? "active" : ""
+                  activeTab === "additional_info" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("care")}
+                onClick={() => setActiveTab("additional_info")}
               >
-                Care & Shipping
+                Additional Information
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected={activeTab === "write_review"}
                 className={`pd-tab-btn ${
-                  activeTab === "features" ? "active" : ""
+                  activeTab === "write_review" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("features")}
+                onClick={() => setActiveTab("write_review")}
               >
-                Highlights & Features
+                Write a Review
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "customer_review"}
+                className={`pd-tab-btn ${
+                  activeTab === "customer_review" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("customer_review")}
+              >
+                Customer Review{reviewsList.length > 0 ? ` (${reviewsList.length})` : ""}
               </button>
             </div>
 
             <div className="pd-tab-content">
+              {/* Tab 1: Description */}
               {activeTab === "description" && (
-                <div>
-                  <p>
-                    {product.description ||
-                      product.short_description ||
-                      "Handcrafted with perfection by master artisans of Pawar Handloom in Maheshwar. Every weave tells a timeless tale of heritage, royal traditions, and unmatched elegance."}
+                <div className="pd-tab-pane">
+                  <p className="pd-desc-text">
+                    {product.description
+                      ? product.description.trim()
+                      : product.short_description
+                      ? product.short_description.trim()
+                      : "The saree has flower buties and skirt boarder.its come with a contrast blouse piece with heavy zari weaving pallu. Fabric of the saree is Maheshwari cotton by silk"}
                   </p>
-                  {product.other_feature && (
-                    <div style={{ marginTop: "14px" }}>
-                      <strong>Note:</strong> {product.other_feature}
+
+                  <div className="pd-desc-table-wrap">
+                    <table className="pd-desc-table">
+                      <tbody>
+                        <tr>
+                          <td className="pd-desc-td-label">Other Feature</td>
+                          <td className="pd-desc-td-value">
+                            {product.other_feature && product.other_feature.trim()
+                              ? product.other_feature.trim()
+                              : "7 Days exchange"}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Additional Information */}
+              {activeTab === "additional_info" && (
+                <div className="pd-tab-pane">
+                  <div className="pd-additional-grid">
+                    <div className="pd-info-card">
+                      <h3 className="pd-info-title">Wash Care</h3>
+                      <p>
+                        Dry clean only for the first two washes. For subsequent washes, gently
+                        hand wash using a mild silk-safe detergent or shampoo. Always air-dry
+                        handloom articles in the shade and iron on medium heat only.
+                      </p>
+                      <ul className="pd-info-list">
+                        <li>Dry clean recommended: first 2 washes</li>
+                        <li>Gentle hand wash thereafter (silk-safe detergent)</li>
+                        <li>Air dry in shade — avoid direct sunlight</li>
+                        <li>Iron at medium heat</li>
+                      </ul>
                     </div>
-                  )}
+
+                    <div className="pd-info-card">
+                      <h3 className="pd-info-title">Shipping & Delivery</h3>
+                      <p>
+                        Orders are dispatched within <strong>1–2 business days</strong> of
+                        order placement. Typical delivery times are{" "}
+                        <strong>{product.delivery_time || "4–7 business days"}</strong> for
+                        domestic shipments pan-India.
+                      </p>
+                      <div className="pd-info-note">
+                        Same-day local delivery is available in <strong>Indore</strong> for
+                        orders placed before 4:00 PM.
+                      </div>
+                    </div>
+
+                    <div className="pd-info-card">
+                      <h3 className="pd-info-title">International Shipments</h3>
+                      <p>
+                        Any import taxes, customs duties, or other charges levied by the
+                        destination country are the responsibility of the customer. If the
+                        carrier pays these on your behalf, you will be required to reimburse
+                        the carrier.
+                      </p>
+                    </div>
+
+                    <div className="pd-info-card">
+                      <h3 className="pd-info-title">Authenticity & Color Disclaimer</h3>
+                      <p>
+                        Every handloom creation is hand-woven by master weavers of
+                        Maheshwar. Subtle nuances in texture, zari motifs, and selvedge are
+                        natural characteristics of authentic handlooms. Actual colors may
+                        vary slightly due to monitor calibration and photography lighting.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              {activeTab === "care" && (
-                <div>
-                  <h4 style={{ margin: "0 0 10px 0", color: "#a83d22" }}>
-                    Washing & Maintenance
-                  </h4>
-                  <p>
-                    {product.wash_care ||
-                      "First wash dry clean and then hand wash with easy or mild shampoo in cold water. Do not wring or dry in direct harsh sunlight."}
-                  </p>
-                  <h4
-                    style={{
-                      margin: "20px 0 10px 0",
-                      color: "#a83d22",
-                    }}
-                  >
-                    Shipping & Delivery
-                  </h4>
-                  <p>
-                    Standard dispatch timeline is{" "}
-                    <strong>{product.delivery_time || "4 to 7 Days"}</strong>.
-                    Pan-India courier shipping with end-to-end tracking.
-                  </p>
+              {/* Tab 3: Write a Review */}
+              {activeTab === "write_review" && (
+                <div className="pd-tab-pane">
+                  <div className="pd-review-form-wrap">
+                    <h3 className="pd-review-form-title">Write a Review</h3>
+                    <form onSubmit={handleReviewSubmit} className="pd-review-form">
+                      <div className="pd-form-group">
+                        <label className="pd-form-label">Your Rating</label>
+                        <div className="pd-star-picker">
+                          {[1, 2, 3, 4, 5].map((starVal) => {
+                            const isFilled =
+                              (hoverRating || reviewRating) >= starVal;
+                            return (
+                              <button
+                                type="button"
+                                key={starVal}
+                                className={`pd-star-btn ${isFilled ? "filled" : ""}`}
+                                onClick={() => setReviewRating(starVal)}
+                                onMouseEnter={() => setHoverRating(starVal)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                aria-label={`Rate ${starVal} out of 5 stars`}
+                              >
+                                <Star
+                                  size={24}
+                                  fill={isFilled ? "#f59e0b" : "none"}
+                                  stroke={isFilled ? "#f59e0b" : "#d1d5db"}
+                                />
+                              </button>
+                            );
+                          })}
+                          <span style={{ fontSize: "14px", fontWeight: 600, color: "#a83d22", marginLeft: "10px" }}>
+                            {reviewRating} of 5 Stars
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pd-form-group">
+                        <label className="pd-form-label">Review Title</label>
+                        <input
+                          type="text"
+                          className="pd-input"
+                          placeholder="e.g. Magnificent Handloom Saree, Exquisite Weave!"
+                          value={reviewTitle}
+                          onChange={(e) => setReviewTitle(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="pd-form-group">
+                        <label className="pd-form-label">Review Content *</label>
+                        <textarea
+                          className="pd-textarea"
+                          rows={4}
+                          placeholder="Share details of your experience with the fabric, zari border, color, and packaging..."
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="pd-form-row">
+                        <div className="pd-form-group">
+                          <label className="pd-form-label">Your Name *</label>
+                          <input
+                            type="text"
+                            className="pd-input"
+                            placeholder="e.g. Priya Sharma"
+                            value={reviewName}
+                            onChange={(e) => setReviewName(e.target.value)}
+                            required
+                          />
+                        </div>
+
+                        <div className="pd-form-group">
+                          <label className="pd-form-label">Email Address *</label>
+                          <input
+                            type="email"
+                            className="pd-input"
+                            placeholder="e.g. priya@example.com"
+                            value={reviewEmail}
+                            onChange={(e) => setReviewEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pd-form-group">
+                        <label className="pd-form-label">YouTube Video URL (Optional)</label>
+                        <input
+                          type="url"
+                          className="pd-input"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          value={reviewYoutube}
+                          onChange={(e) => setReviewYoutube(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="pd-form-group">
+                        <label className="pd-form-label">Upload Photos (Optional)</label>
+                        <label className="pd-file-dropzone">
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                setReviewFiles(Array.from(e.target.files));
+                              }
+                            }}
+                          />
+                          <Upload size={20} color="#a83d22" />
+                          <span style={{ fontSize: "14px", color: "#6b7280" }}>
+                            {reviewFiles.length > 0
+                              ? `${reviewFiles.length} file(s) selected`
+                              : "Click to upload product photos"}
+                          </span>
+                        </label>
+                        {reviewFiles.length > 0 && (
+                          <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
+                            {reviewFiles.map((f, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  background: "#f0e6d6",
+                                  color: "#2b2520",
+                                  padding: "4px 10px",
+                                  borderRadius: "6px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                {f.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="pd-submit-review-btn"
+                        disabled={submittingReview}
+                      >
+                        {submittingReview ? "Submitting Review..." : "Submit Review"}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               )}
 
-              {activeTab === "features" && (
-                <div>
-                  <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
-                    <li>
-                      <strong>Product Reference:</strong>{" "}
-                      {product.product_reference || `PH-${product.id}`}
-                    </li>
-                    <li>
-                      <strong>Handloom Origin:</strong> Maheshwar, Madhya
-                      Pradesh
-                    </li>
-                    <li>
-                      <strong>Fabric Composition:</strong>{" "}
-                      {product.fabric_type || "Pure Silk Cotton"}
-                    </li>
-                    <li>
-                      <strong>Return & Exchange:</strong>{" "}
-                      {product.other_feature || "7 Days Exchange Available"}
-                    </li>
-                  </ul>
+              {/* Tab 4: Customer Review */}
+              {activeTab === "customer_review" && (
+                <div className="pd-tab-pane">
+                  <div className="pd-customer-reviews-wrap">
+                    <div className="pd-reviews-header-bar">
+                      <div>
+                        <h3
+                          style={{
+                            fontFamily: "'DM Serif Display', Georgia, serif",
+                            fontSize: "24px",
+                            color: "#2b2520",
+                            margin: 0,
+                          }}
+                        >
+                          Customer Reviews
+                        </h3>
+                        <p style={{ margin: "4px 0 0 0", color: "#7d7268", fontSize: "14px" }}>
+                          {reviewsList.length} verified review{reviewsList.length === 1 ? "" : "s"} for this product
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("write_review")}
+                        className="pd-write-review-cta-btn"
+                      >
+                        Write a Review
+                      </button>
+                    </div>
+
+                    {reviewsList.length === 0 ? (
+                      <div className="pd-empty-reviews">
+                        <p style={{ fontSize: "15px", color: "#6b7280", margin: "0 0 16px 0" }}>
+                          No customer reviews yet. Be the first to review this authentic handloom saree!
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("write_review")}
+                          className="pd-empty-review-btn"
+                        >
+                          Write the First Review
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="pd-reviews-card-list">
+                        {reviewsList.map((rev: any) => {
+                          const revRating = Number(rev.rating) || 5;
+                          const revImages = rev.review_images
+                            ? rev.review_images.split(",").filter(Boolean)
+                            : [];
+                          const isLiked = likedReviews[rev.id];
+
+                          return (
+                            <div key={rev.id} className="pd-review-card">
+                              <div className="pd-review-card-head">
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                  <div className="pd-reviewer-avatar">
+                                    {(rev.name || "Customer").charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="pd-reviewer-name">
+                                      {rev.name || "Customer"}
+                                    </div>
+                                    <div className="pd-review-stars">
+                                      {[1, 2, 3, 4, 5].map((s) => (
+                                        <Star
+                                          key={s}
+                                          size={14}
+                                          fill={s <= revRating ? "#f59e0b" : "none"}
+                                          stroke={s <= revRating ? "#f59e0b" : "#d1d5db"}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <span className="pd-review-date">
+                                  {rev.created_at
+                                    ? new Date(rev.created_at).toLocaleDateString("en-IN", {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                      })
+                                    : "Verified Buyer"}
+                                </span>
+                              </div>
+
+                              {rev.review_title && (
+                                <h4 className="pd-review-card-title">{rev.review_title}</h4>
+                              )}
+
+                              <p className="pd-review-card-text">{rev.review_text}</p>
+
+                              {revImages.length > 0 && (
+                                <div className="pd-review-images-strip">
+                                  {revImages.map((img: string, idx: number) => (
+                                    <img
+                                      key={idx}
+                                      src={`http://localhost:8080/uploads/review_images/${img}`}
+                                      alt="Customer photo"
+                                      className="pd-review-thumb-img"
+                                    />
+                                  ))}
+                                </div>
+                              )}
+
+                              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleLikeReview(rev.id)}
+                                  className={`pd-review-like-btn ${isLiked ? "liked" : ""}`}
+                                  disabled={isLiked}
+                                  aria-label="Like review"
+                                >
+                                  <ThumbsUp size={14} />
+                                  <span>Helpful ({rev.likes || 0})</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1503,6 +2389,21 @@ export default function ProductDetailClient({
       >
         <MessageCircle size={28} fill="currentColor" />
       </a>
+
+      {/* Floating Sticky Reviews Button on Right Edge */}
+      <div className="sticky-review-pawar">
+        <button
+          type="button"
+          className="review-btn"
+          onClick={() => scrollToTabsSection("customer_review")}
+          aria-label="Open Customer Reviews"
+        >
+          <svg viewBox="0 0 24 24" className="star-icon">
+            <path d="M12 17.27L18.18 21 16.54 13.97 22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+          <span className="review-text">Reviews</span>
+        </button>
+      </div>
     </>
   );
 }

@@ -876,11 +876,12 @@ export default function ReviewClient({
                           >
                             {review.name || "Customer"}
                             {review.verified && (
-                              <CheckCircle2
-                                size={14}
-                                color="#16a34a"
-                                title="Verified Customer"
-                              />
+                              <span title="Verified Customer">
+                                <CheckCircle2
+                                  size={14}
+                                  color="#16a34a"
+                                />
+                              </span>
                             )}
                           </div>
                           <span style={{ fontSize: "0.8rem", color: "#888" }}>
