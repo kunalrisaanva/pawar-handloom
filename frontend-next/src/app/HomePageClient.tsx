@@ -52,184 +52,184 @@ const HERO_IMAGES = [
 ];
 
 const SUBCATEGORIES = [
-  { name: "Pure Cotton Saree", img: "/coll.png", slug: "pure-cotton-saree" },
-  { name: "Pure Silk Cotton Sarees", img: "/coll01.png", slug: "pure-silk-cotton-sarees" },
-  { name: "Pure Silk Sarees", img: "/coll.png", slug: "pure-silk-sarees" },
-  { name: "Pure Tissue Saree", img: "/coll01.png", slug: "pure-tissue-saree" },
+  { name: "Pure Cotton Saree", img: "/coll.png", id: 1, href: "/detail/1" },
+  { name: "Pure Silk Cotton Sarees", img: "/coll01.png", id: 2, href: "/detail/2" },
+  { name: "Pure Silk Sarees", img: "/coll.png", id: 4, href: "/detail/4" },
+  { name: "Pure Tissue Saree", img: "/coll01.png", id: 10, href: "/detail/10" },
 ];
 
 const NEW_ARRIVALS = [
   {
-    name: "Pure Maheshwari Silver zari...",
+    id: 10,
+    name: "Pure Maheshwari silver zari & tissue palla saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375798_4a24f6b2ccfcdd56abf1.jpeg",
     originalPrice: "4,500.00",
     salePrice: "4,050.00",
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
-    slug: "pure-maheshwari-silver-zari-1",
   },
   {
-    name: "Pure Maheshwari golden zari...",
+    id: 12,
+    name: "Pure Maheshwari golden zari flower butta palla saree.",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375914_dcd3fc95eed16a8fea82.jpeg",
     originalPrice: "3,000.00",
     salePrice: "2,700.00",
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
-    slug: "pure-maheshwari-golden-zari-1",
   },
   {
-    name: "Pure Maheshwari silver zari...",
+    id: 13,
+    name: "Pure Maheshwari Silver zari saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376053_d5b3322b97f4c6e66e51.jpeg",
     originalPrice: "2,750.00",
     salePrice: "2,475.00",
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
-    slug: "pure-maheshwari-silver-zari-2",
   },
   {
-    name: "Pure Chanderi silk cotton...",
+    id: 9,
+    name: "Pure Chanderi silk cotton shoulder palla saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376180_d75d56b44f97e3e6e68e.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
     badge: "NEW",
     readyToShip: true,
-    slug: "pure-chanderi-silk-cotton-1",
   },
 ];
 
 const SAREE_CATEGORIES = [
-  { name: "Maheshwari Sarees", img: "/shop-category-1.png", slug: "maheshwari-sarees" },
-  { name: "Chanderi Sarees", img: "/shop-category-2.png", slug: "chanderi-sarees" },
-  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", slug: "handblock-printed-sarees" },
-  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", slug: "pure-cotton-sarees" },
+  { name: "Maheshwari Sarees", img: "/shop-category-1.png", id: 10, href: "/detail/10" },
+  { name: "Chanderi Sarees", img: "/shop-category-2.png", id: 9, href: "/detail/9" },
+  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", id: 4, href: "/detail/4" },
+  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", id: 1, href: "/detail/1" },
 ];
 
 const DRESS_MATERIALS = [
   {
+    id: 1,
     name: "Maheshwari Bagh Suits",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383012_433d62525d79e078b558.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
-    slug: "maheshwari-bagh-suits",
   },
   {
+    id: 2,
     name: "Dress Material",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383095_26fdba15a2226f5bb2ad.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
-    slug: "dress-material-1",
   },
   {
+    id: 3,
     name: "Dress Material",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383177_1e6bdc13ee56da5dfa1e.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
-    slug: "dress-material-2",
   },
   {
+    id: 4,
     name: "Dress Material",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383264_e91a36f61bfd24b09aaf.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
-    slug: "dress-material-3",
   },
 ];
 
 const BEST_SELLERS = [
   {
-    name: "Pure Maheshwari Silver zari...",
+    id: 15,
+    name: "Pure Maheshwari Silk Cotton Saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375798_4a24f6b2ccfcdd56abf1.jpeg",
     originalPrice: "4,500.00",
     salePrice: "4,050.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
-    slug: "pure-maheshwari-silver-zari-bs1",
   },
   {
-    name: "Pure Maheshwari golden zari...",
+    id: 16,
+    name: "Pure Maheshwari tissue Palla Saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375914_dcd3fc95eed16a8fea82.jpeg",
     originalPrice: "3,000.00",
     salePrice: "2,700.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
-    slug: "pure-maheshwari-golden-zari-bs1",
   },
   {
-    name: "Pure Maheshwari silver zari...",
+    id: 10,
+    name: "Pure Maheshwari silver zari & tissue palla saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376053_d5b3322b97f4c6e66e51.jpeg",
     originalPrice: "2,750.00",
     salePrice: "2,475.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
-    slug: "pure-maheshwari-silver-zari-bs2",
   },
   {
-    name: "Pure Chanderi silk cotton...",
+    id: 12,
+    name: "Pure Maheshwari golden zari flower butta palla saree.",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376180_d75d56b44f97e3e6e68e.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
     badge: "BESTSELLER",
-    slug: "pure-chanderi-silk-cotton-bs1",
   },
 ];
 
 const SEE_IT_LOVE_IT = [
   {
-    name: "Maheshwari Heavy Pallu Saree",
+    id: 4,
+    name: "Pure Pattu silk saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375798_4a24f6b2ccfcdd56abf1.jpeg",
     originalPrice: "10,000.00",
     salePrice: "9,000.00",
     discount: "10% OFF",
-    slug: "maheshwari-heavy-pallu-saree",
   },
   {
-    name: "Maheshwari saree",
+    id: 5,
+    name: "Pure Pattu silk saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756375914_dcd3fc95eed16a8fea82.jpeg",
     originalPrice: "7,500.00",
     salePrice: "6,750.00",
     discount: "10% OFF",
-    slug: "maheshwari-saree-1",
   },
   {
-    name: "Maheshwari Pure Mullbery Silk Saree",
+    id: 9,
+    name: "Pure Chanderi silk cotton shoulder palla saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376053_d5b3322b97f4c6e66e51.jpeg",
-    originalPrice: "22,000.00",
-    salePrice: "19,800.00",
+    originalPrice: "5,000.00",
+    salePrice: "4,500.00",
     discount: "10% OFF",
-    slug: "maheshwari-pure-mullbery-silk-saree",
   },
   {
-    name: "Silver Boarder Saree",
+    id: 10,
+    name: "Pure Maheshwari silver zari & tissue palla saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756376180_d75d56b44f97e3e6e68e.jpeg",
-    originalPrice: "6,300.00",
-    salePrice: "5,670.00",
+    originalPrice: "6,000.00",
+    salePrice: "5,400.00",
     discount: "10% OFF",
-    slug: "silver-boarder-saree",
   },
   {
-    name: "Maheshwari Saree",
+    id: 1,
+    name: "Pure Silk Cotton Saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383012_433d62525d79e078b558.jpeg",
     originalPrice: "5,700.00",
     salePrice: "5,130.00",
     discount: "10% OFF",
-    slug: "maheshwari-saree-2",
   },
   {
-    name: "Maheshwari saree",
+    id: 2,
+    name: "Pure silk cotton saree",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383095_26fdba15a2226f5bb2ad.jpeg",
     originalPrice: "5,800.00",
     salePrice: "5,220.00",
     discount: "10% OFF",
-    slug: "maheshwari-saree-3",
   },
 ];
 
@@ -771,10 +771,27 @@ function ProductCard({
   slug?: string;
 }) {
   const [liked, setLiked] = useState(false);
-  const linkHref = slug ? `/${slug}` : (id ? `/detail/${id}` : "#");
+  const targetId = id || (slug && !isNaN(Number(slug)) ? slug : "10");
+  const linkHref = `/detail/${targetId}`;
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If user clicked a button or inside a button (wishlist or cart), don't navigate
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    // If user clicked inside an anchor tag, let the link run
+    if ((e.target as HTMLElement).closest("a")) {
+      return;
+    }
+    window.location.href = linkHref;
+  };
 
   return (
-    <div className="product-card">
+    <div
+      className="product-card"
+      onClick={handleCardClick}
+      style={{ cursor: "pointer" }}
+    >
       <div className="product-card-media">
         <a href={linkHref} style={{ display: "block" }}>
           <img
@@ -790,7 +807,10 @@ function ProductCard({
           className={`product-card-wishlist${liked ? " is-active" : ""}`}
           aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={liked}
-          onClick={() => setLiked(!liked)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setLiked(!liked);
+          }}
         >
           <Heart
             size={26}
@@ -844,14 +864,16 @@ function ProductCard({
             type="button"
             className="product-card-cart"
             aria-label={`Add ${name} to cart`}
-            onClick={async () => {
-              if (!id) {
+            onClick={async (e) => {
+              e.stopPropagation();
+              const cartId = id || targetId;
+              if (!cartId) {
                 alert("Cannot add to cart without ID");
                 return;
               }
               try {
                 const formData = new URLSearchParams();
-                formData.append("id", id.toString());
+                formData.append("id", cartId.toString());
                 formData.append("product_name", name);
                 formData.append("offer_price", salePrice);
                 formData.append("qty", "1");
@@ -870,7 +892,7 @@ function ProductCard({
                 const result = await response.json();
                 if (result.status === "success") {
                   alert(result.message || "Product added to cart!");
-                  // Optionally trigger a cart refresh here
+                  window.dispatchEvent(new Event("cart-updated"));
                 } else {
                   alert("Failed to add product to cart");
                 }
@@ -958,28 +980,38 @@ function ShopByCategoryTabs() {
       </div>
 
       <div className="product-grid">
-        {currentData.map((cat, idx) => (
-          <div key={cat.name + idx} className="category-card">
-            <img
-              src="/card-ornament.png"
-              alt=""
-              className="card-top-right-ornament"
-            />
-            <a
-              href={`/${(cat as any).slug || "#"}`}
-              style={{ display: "block" }}
+        {currentData.map((cat, idx) => {
+          const catHref =
+            (cat as any).href ||
+            ((cat as any).id ? `/detail/${(cat as any).id}` : "/detail/10");
+          return (
+            <div
+              key={cat.name + idx}
+              className="category-card"
+              onClick={() => {
+                window.location.href = catHref;
+              }}
+              style={{ cursor: "pointer" }}
             >
-              <img src={cat.img} alt={cat.name} className="category-card-img" />
-            </a>
-            <h4>{cat.name}</h4>
-            <a
-              href={`/${(cat as any).slug || "#"}`}
-              className="btn-details"
-            >
-              DETAILS
-            </a>
-          </div>
-        ))}
+              <img
+                src="/card-ornament.png"
+                alt=""
+                className="card-top-right-ornament"
+              />
+              <a href={catHref} style={{ display: "block" }}>
+                <img
+                  src={cat.img}
+                  alt={cat.name}
+                  className="category-card-img"
+                />
+              </a>
+              <h4>{cat.name}</h4>
+              <a href={catHref} className="btn-details">
+                DETAILS
+              </a>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -1895,7 +1927,11 @@ export default function Index({
         </div>
         <div className="subcategory-icons" style={{ background: "transparent", paddingTop: 0 }}>
           {SUBCATEGORIES.map((cat) => (
-            <a key={cat.name} href={`/${(cat as any).slug || '#'}`} className="subcategory-item">
+            <a
+              key={cat.name}
+              href={(cat as any).href || `/detail/${(cat as any).id || 10}`}
+              className="subcategory-item"
+            >
               <img src={cat.img} alt={cat.name} />
               <span>{cat.name}</span>
             </a>
@@ -2020,21 +2056,35 @@ export default function Index({
           </h2>
         </div>
         <div className="celebs-grid">
-          {displayCelebsLook.map((product, i) => (
-            <div key={i} className="celebs-card">
-              <img
-                src="/card-ornament.png"
-                alt=""
-                className="card-top-right-ornament"
-              />
-              <a
-                href={`/${(product as any).slug || "#"}`}
-                style={{ display: "block", height: "100%" }}
+          {displayCelebsLook.map((product, i) => {
+            const celebHref = product.id
+              ? `/detail/${product.id}`
+              : (product as any).slug && !isNaN(Number((product as any).slug))
+              ? `/detail/${(product as any).slug}`
+              : "/detail/10";
+            return (
+              <div
+                key={i}
+                className="celebs-card"
+                onClick={() => {
+                  window.location.href = celebHref;
+                }}
+                style={{ cursor: "pointer" }}
               >
-                <img src={product.img} alt={`Celebs ${i + 1}`} />
-              </a>
-            </div>
-          ))}
+                <img
+                  src="/card-ornament.png"
+                  alt=""
+                  className="card-top-right-ornament"
+                />
+                <a
+                  href={celebHref}
+                  style={{ display: "block", height: "100%" }}
+                >
+                  <img src={product.img} alt={`Celebs ${i + 1}`} />
+                </a>
+              </div>
+            );
+          })}
         </div>
         <div style={{ textAlign: "center" }}>
           <a href="/shop/8" className="btn-view-all">

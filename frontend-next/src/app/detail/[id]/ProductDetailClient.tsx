@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -7,409 +8,1245 @@ import {
   ShieldCheck,
   Heart,
   Share2,
+  Check,
+  Phone,
+  MessageCircle,
+  Sparkles,
+  Info,
+  Clock,
+  Sparkle,
 } from "lucide-react";
+
+interface ColorItem {
+  id: number;
+  colour_name: string;
+  colour_code: string;
+  colour_rgb?: string;
+}
+
+interface ProductImageItem {
+  id: number;
+  product_id: number;
+  image: string;
+}
+
+interface ProductDetailProps {
+  product: any;
+  images?: ProductImageItem[];
+  colors?: ColorItem[];
+  categoryName?: string;
+  relatedProducts?: any[];
+}
 
 export default function ProductDetailClient({
   product,
+  images = [],
+  colors = [],
+  categoryName = "Sarees",
   relatedProducts = [],
-}: {
-  product: any;
-  relatedProducts?: any[];
-}) {
-  const [qty, setQty] = useState(1);
-  const [adding, setAdding] = useState(false);
+}: ProductDetailProps) {
+  // Normalize images list: cover image + gallery images
+  const allImages: string[] = [];
+  if (product.cover_image) {
+    allImages.push("http://localhost:8080/" + product.cover_image);
+  }
+  images.forEach((img) => {
+    if (img.image) {
+      const fullUrl = "http://localhost:8080/" + img.image;
+      if (!allImages.includes(fullUrl)) {
+        allImages.push(fullUrl);
+      }
+    }
+  });
+  if (allImages.length === 0) {
+    allImages.push("/placeholder.png");
+  }
 
-  const coverImage = product.cover_image
-    ? "http://localhost:8080/" + product.cover_image
-    : "/placeholder.png";
+  const [activeImage, setActiveImage] = useState<string>(allImages[0]);
+  const [qty, setQty] = useState<number>(1);
+  const [selectedColor, setSelectedColor] = useState<ColorItem | null>(
+    colors.length > 0 ? colors[0] : null
+  );
+  const [adding, setAdding] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("description");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Price calculations matching Pawar Handloom pricing rules
+  const actualPrice = Number(product.actual_price_customer || product.actual_price || 0);
+  const rawOffer = Number(product.offer_price || 0);
+
+  let finalPrice = actualPrice;
+  let discountPercent = 0;
+
+  if (rawOffer > 0 && rawOffer <= 100) {
+    // rawOffer is percentage discount (e.g. 10 for 10% off)
+    discountPercent = Math.round(rawOffer);
+    const discountAmount = (actualPrice * discountPercent) / 100;
+    finalPrice = Math.max(0, actualPrice - discountAmount);
+  } else if (rawOffer > 100) {
+    // rawOffer is absolute final price
+    finalPrice = rawOffer;
+    if (actualPrice > finalPrice) {
+      discountPercent = Math.round(((actualPrice - finalPrice) / actualPrice) * 100);
+    }
+  }
+
+  const formatINR = (val: number) => {
+    return val.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const addToCart = async () => {
     setAdding(true);
     try {
-      const formData = new FormData();
+      const formData = new URLSearchParams();
       formData.append("id", product.id.toString());
       formData.append("product_name", product.product_name);
-      formData.append("offer_price", product.offer_price.toString());
+      formData.append("offer_price", finalPrice.toString());
       formData.append("qty", qty.toString());
-      formData.append("image", coverImage);
-      formData.append("color", "");
+      formData.append("image", activeImage);
+      formData.append("color", selectedColor ? selectedColor.colour_name : "");
 
       const res = await fetch("http://localhost:8080/cart/add", {
         method: "POST",
-        body: formData,
         credentials: "include",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
       });
 
       const data = await res.json();
       if (data.status === "success") {
         window.dispatchEvent(new Event("cart-updated"));
-        alert("Added to cart!");
+        showToast("✓ Added to cart successfully!");
       } else {
         alert(data.message || "Failed to add to cart");
       }
     } catch (e) {
-      console.error(e);
-      alert("Error adding to cart");
+      console.error("Add to cart error:", e);
+      alert("Error adding to cart. Please ensure backend is running.");
     } finally {
       setAdding(false);
     }
   };
 
+  const whatsappMessage = encodeURIComponent(
+    `Hello Pawar Handloom, I am interested in "${product.product_name}" (Product ID: ${product.id}) priced at INR ${formatINR(finalPrice)}. Is it available?`
+  );
+
   return (
     <>
       <style>{`
-        .product-detail-container {
-          max-width: 1200px;
+        .product-detail-wrapper {
+          background-color: #faf7f2;
+          min-height: 100vh;
+          padding: 30px 16px 80px;
+          color: #2b2520;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .product-detail-inner {
+          max-width: 1240px;
           margin: 0 auto;
-          padding: 40px 20px;
-          font-family: var(--font-sans);
         }
-        .breadcrumb {
-          margin-bottom: 24px;
+
+        /* Breadcrumb */
+        .pd-breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          color: #7d7268;
+          margin-bottom: 28px;
+          flex-wrap: wrap;
         }
-        .breadcrumb a {
+        .pd-breadcrumb a {
           color: #a83d22;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           font-weight: 500;
+          transition: color 0.2s;
         }
-        .detail-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 60px;
+        .pd-breadcrumb a:hover {
+          color: #872e17;
+          text-decoration: underline;
         }
-        @media (max-width: 900px) {
-          .detail-grid {
-            grid-template-columns: 1fr;
-            gap: 40px;
-          }
+        .pd-breadcrumb-sep {
+          color: #c7bba8;
         }
-        .product-gallery {
-          background: #f9f9f9;
-          border-radius: 16px;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .product-gallery img {
-          width: 100%;
-          height: auto;
-          object-fit: cover;
-        }
-        .product-info h1 {
-          font-family: 'DM Serif Display', serif;
-          font-size: 36px;
-          color: #333;
-          margin-top: 0;
-          margin-bottom: 16px;
-        }
-        .price-row {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 24px;
-        }
-        .sale-price {
-          font-size: 28px;
-          color: #a83d22;
-          font-weight: 600;
-        }
-        .original-price {
-          font-size: 20px;
-          color: #999;
-          text-decoration: line-through;
-        }
-        .qty-selector {
-          display: inline-flex;
-          align-items: center;
-          border: 1px solid #ccc;
-          border-radius: 30px;
-          overflow: hidden;
-          margin-bottom: 24px;
-        }
-        .qty-btn {
-          background: none;
-          border: none;
-          padding: 12px 20px;
-          font-size: 18px;
-          cursor: pointer;
-        }
-        .qty-btn:hover {
-          background: #f1f1f1;
-        }
-        .qty-val {
-          padding: 0 20px;
+        .pd-breadcrumb-current {
+          color: #4a4036;
           font-weight: 500;
-          font-size: 18px;
-        }
-        .action-row {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 32px;
-        }
-        .add-to-cart-btn {
-          flex: 1;
-          background: #a83d22;
-          color: white;
-          border: none;
-          padding: 16px;
-          border-radius: 30px;
-          font-size: 18px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-          transition: background 0.2s;
-        }
-        .add-to-cart-btn:hover {
-          background: #8a2f17;
-        }
-        .icon-btn {
-          width: 56px;
-          height: 56px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid #ccc;
-          border-radius: 50%;
-          background: white;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .icon-btn:hover {
-          background: #f9f9f9;
-        }
-        .product-description {
-          line-height: 1.6;
-          color: #555;
-          margin-bottom: 32px;
-        }
-        .features {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          margin-top: 32px;
-          border-top: 1px solid #eee;
-          padding-top: 24px;
-        }
-        .feature-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          color: #444;
-          font-weight: 500;
-        }
-        .related-products-section {
-          margin-top: 80px;
-          padding-top: 40px;
-          border-top: 1px solid #ede3c9;
-        }
-        .related-title {
-          font-family: 'DM Serif Display', serif;
-          font-size: 32px;
-          text-align: center;
-          margin-bottom: 40px;
-          color: #333;
-        }
-        .related-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
-        }
-        @media (max-width: 1024px) {
-          .related-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        @media (max-width: 600px) {
-          .related-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-          }
-        }
-        .product-card {
-          border-radius: 12px;
-          overflow: hidden;
-          background: #fff;
-          transition: transform 0.3s;
-          display: block;
-          text-decoration: none;
-          color: inherit;
-        }
-        .product-card:hover {
-          transform: translateY(-5px);
-        }
-        .product-img-wrapper {
-          position: relative;
-          aspect-ratio: 3/4;
-          background: #f4f4f4;
-          overflow: hidden;
-        }
-        .product-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s ease;
-        }
-        .product-card:hover .product-img {
-          transform: scale(1.05);
-        }
-        .product-info-sm {
-          padding: 16px 12px;
-          text-align: center;
-        }
-        .product-name-sm {
-          font-size: 16px;
-          color: #333;
-          margin-bottom: 8px;
+          max-width: 320px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .product-price-sm {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
+
+        /* Main Grid */
+        .pd-main-grid {
+          display: grid;
+          grid-template-columns: 1.15fr 1fr;
+          gap: 48px;
+          background: #ffffff;
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: 0 10px 40px rgba(80, 50, 30, 0.05);
+          border: 1px solid #ede3c9;
         }
-        .sale-price-sm {
+
+        @media (max-width: 992px) {
+          .pd-main-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            padding: 24px 20px;
+          }
+        }
+
+        /* Gallery Layout */
+        .pd-gallery-container {
+          display: flex;
+          gap: 20px;
+          align-items: flex-start;
+        }
+
+        @media (max-width: 640px) {
+          .pd-gallery-container {
+            flex-direction: column-reverse;
+          }
+        }
+
+        /* Thumbnails Strip (Left) */
+        .pd-thumbnails-strip {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          width: 86px;
+          flex-shrink: 0;
+          max-height: 580px;
+          overflow-y: auto;
+          scrollbar-width: thin;
+        }
+
+        @media (max-width: 640px) {
+          .pd-thumbnails-strip {
+            flex-direction: row;
+            width: 100%;
+            max-height: none;
+            overflow-x: auto;
+            padding-bottom: 6px;
+          }
+        }
+
+        .pd-thumbnail-item {
+          width: 86px;
+          height: 108px;
+          border-radius: 10px;
+          overflow: hidden;
+          cursor: pointer;
+          border: 2px solid #ede3c9;
+          background: #fbf9f5;
+          transition: all 0.2s ease;
+          position: relative;
+        }
+
+        @media (max-width: 640px) {
+          .pd-thumbnail-item {
+            width: 70px;
+            height: 90px;
+            flex-shrink: 0;
+          }
+        }
+
+        .pd-thumbnail-item:hover {
+          border-color: #a83d22;
+          transform: translateY(-2px);
+        }
+
+        .pd-thumbnail-item.active {
+          border-color: #a83d22;
+          box-shadow: 0 0 0 2px rgba(168, 61, 34, 0.25);
+        }
+
+        .pd-thumbnail-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        /* Main Image Showcase */
+        .pd-showcase-container {
+          flex: 1;
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          background: #fbf9f5;
+          border: 1px solid #f0e6d6;
+          min-height: 480px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pd-showcase-img {
+          width: 100%;
+          height: auto;
+          max-height: 640px;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.3s ease;
+        }
+
+        .pd-showcase-actions {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          z-index: 5;
+        }
+
+        .pd-action-icon-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(4px);
+          border: 1px solid rgba(220, 205, 185, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #443a32;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+          transition: all 0.2s ease;
+        }
+
+        .pd-action-icon-btn:hover {
+          background: #ffffff;
+          transform: scale(1.08);
           color: #a83d22;
+        }
+
+        .pd-action-icon-btn.active {
+          color: #e53935;
+          background: #ffebee;
+          border-color: #ffcdd2;
+        }
+
+        /* Product Info Side */
+        .pd-info-container {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .pd-product-title {
+          font-family: 'DM Serif Display', Georgia, serif;
+          font-size: 34px;
+          line-height: 1.25;
+          color: #1e1915;
+          margin: 0 0 16px 0;
+          font-weight: 400;
+          letter-spacing: -0.01em;
+        }
+
+        @media (max-width: 640px) {
+          .pd-product-title {
+            font-size: 26px;
+          }
+        }
+
+        /* Pricing Block */
+        .pd-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          flex-wrap: wrap;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #f2e9dc;
+          margin-bottom: 20px;
+        }
+
+        .pd-original-price {
+          font-size: 19px;
+          color: #8c8275;
+          text-decoration: line-through;
+          font-weight: 400;
+        }
+
+        .pd-final-price {
+          font-size: 28px;
+          color: #a83d22;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+
+        .pd-per-piece {
+          font-size: 16px;
+          color: #5c5247;
+          font-weight: 500;
+        }
+
+        .pd-discount-badge {
+          background: #fbf1ee;
+          color: #a83d22;
+          font-size: 13px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 20px;
+          border: 1px solid #f2d2c7;
+          letter-spacing: 0.02em;
+        }
+
+        /* Description */
+        .pd-short-desc {
+          color: #554a40;
+          font-size: 15px;
+          line-height: 1.65;
+          margin-bottom: 24px;
+        }
+
+        /* Color Selection */
+        .pd-color-section {
+          margin-bottom: 24px;
+        }
+
+        .pd-section-label {
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #5c5247;
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .pd-color-swatches {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .pd-color-circle {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          position: relative;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          border: 2px solid #ffffff;
+          box-shadow: 0 0 0 1px #d6cbbe;
+        }
+
+        .pd-color-circle:hover {
+          transform: scale(1.15);
+        }
+
+        .pd-color-circle.active {
+          box-shadow: 0 0 0 2.5px #a83d22;
+          transform: scale(1.12);
+        }
+
+        .pd-color-circle.active::after {
+          content: "";
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #ffffff;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+
+        /* Quantity & Add to Cart */
+        .pd-purchase-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 28px;
+          flex-wrap: wrap;
+        }
+
+        .pd-qty-selector {
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid #d4c8b6;
+          border-radius: 8px;
+          background: #fbf9f5;
+          height: 48px;
+          overflow: hidden;
+        }
+
+        .pd-qty-btn {
+          width: 44px;
+          height: 100%;
+          background: transparent;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          color: #4a4036;
+          transition: background 0.15s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pd-qty-btn:hover {
+          background: #ece3d3;
+        }
+
+        .pd-qty-value {
+          width: 48px;
+          text-align: center;
           font-weight: 600;
           font-size: 16px;
+          color: #2b2520;
         }
-        .original-price-sm {
-          color: #999;
-          text-decoration: line-through;
+
+        .pd-add-to-cart-btn {
+          flex: 1;
+          min-width: 200px;
+          height: 48px;
+          background: #a83d22;
+          color: #ffffff;
+          border: 1.5px solid #a83d22;
+          border-radius: 8px;
+          font-size: 15px;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 14px rgba(168, 61, 34, 0.22);
+        }
+
+        .pd-add-to-cart-btn:hover {
+          background: #8b3018;
+          border-color: #8b3018;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 18px rgba(168, 61, 34, 0.32);
+        }
+
+        .pd-add-to-cart-btn:active {
+          transform: translateY(0);
+        }
+
+        .pd-add-to-cart-btn:disabled {
+          background: #c7bba8;
+          border-color: #c7bba8;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        /* Specifications Table */
+        .pd-specifications-container {
+          background: #fdfbf7;
+          border-radius: 12px;
+          border: 1px solid #eee5d3;
+          padding: 16px 20px;
+          margin-bottom: 24px;
+        }
+
+        .pd-spec-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 11px 0;
+          font-size: 14.5px;
+          border-bottom: 1px solid #f2e9dc;
+        }
+
+        .pd-spec-row:last-child {
+          border-bottom: none;
+        }
+
+        .pd-spec-label {
+          color: #2b2520;
+          font-weight: 600;
+          min-width: 140px;
+        }
+
+        .pd-spec-value {
+          color: #554a40;
+          text-align: right;
+          font-weight: 400;
+          max-width: 60%;
+        }
+
+        /* Service Guarantee Row */
+        .pd-guarantees-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          padding-top: 14px;
+          border-top: 1px solid #f0e6d6;
+        }
+
+        .pd-guarantee-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #4a4036;
+          font-size: 13.5px;
+          font-weight: 500;
+        }
+
+        .pd-guarantee-icon {
+          color: #a83d22;
+          flex-shrink: 0;
+        }
+
+        /* Tabbed Sections */
+        .pd-tabs-container {
+          margin-top: 48px;
+          background: #ffffff;
+          border-radius: 18px;
+          padding: 36px 40px;
+          border: 1px solid #ede3c9;
+          box-shadow: 0 4px 20px rgba(80, 50, 30, 0.03);
+        }
+
+        @media (max-width: 640px) {
+          .pd-tabs-container {
+            padding: 24px 20px;
+          }
+        }
+
+        .pd-tabs-nav {
+          display: flex;
+          gap: 28px;
+          border-bottom: 2px solid #f2e9dc;
+          margin-bottom: 28px;
+          overflow-x: auto;
+        }
+
+        .pd-tab-btn {
+          background: none;
+          border: none;
+          padding: 12px 4px 14px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #7d7268;
+          cursor: pointer;
+          position: relative;
+          transition: color 0.2s;
+          white-space: nowrap;
+        }
+
+        .pd-tab-btn:hover {
+          color: #a83d22;
+        }
+
+        .pd-tab-btn.active {
+          color: #a83d22;
+        }
+
+        .pd-tab-btn.active::after {
+          content: "";
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #a83d22;
+          border-radius: 3px;
+        }
+
+        .pd-tab-content {
+          font-size: 15px;
+          line-height: 1.8;
+          color: #4a4036;
+        }
+
+        /* Related Products */
+        .pd-related-section {
+          margin-top: 60px;
+        }
+
+        .pd-related-title {
+          font-family: 'DM Serif Display', Georgia, serif;
+          font-size: 32px;
+          text-align: center;
+          color: #2b2520;
+          margin-bottom: 36px;
+        }
+
+        .pd-related-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+
+        @media (max-width: 992px) {
+          .pd-related-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 540px) {
+          .pd-related-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .pd-related-card {
+          background: #ffffff;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid #ede3c9;
+          text-decoration: none;
+          color: inherit;
+          display: flex;
+          flex-direction: column;
+          transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .pd-related-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 28px rgba(90, 50, 30, 0.08);
+        }
+
+        .pd-related-media {
+          aspect-ratio: 3/4;
+          background: #fbf9f5;
+          overflow: hidden;
+        }
+
+        .pd-related-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s ease;
+        }
+
+        .pd-related-card:hover .pd-related-media img {
+          transform: scale(1.04);
+        }
+
+        .pd-related-body {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .pd-related-name {
+          font-size: 15px;
+          font-weight: 600;
+          color: #2b2520;
+          margin-bottom: 8px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          height: 42px;
+        }
+
+        .pd-related-price {
+          font-size: 16px;
+          font-weight: 700;
+          color: #a83d22;
+          margin-top: auto;
+        }
+
+        /* Floating Contact Buttons */
+        .pd-floating-call {
+          position: fixed;
+          bottom: 28px;
+          left: 28px;
+          background: #109cb0;
+          color: #ffffff;
+          border-radius: 50px;
+          padding: 10px 20px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           font-size: 14px;
+          font-weight: 600;
+          text-decoration: none;
+          box-shadow: 0 6px 20px rgba(16, 156, 176, 0.35);
+          z-index: 1000;
+          transition: all 0.2s ease;
+        }
+
+        .pd-floating-call:hover {
+          background: #0d8394;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(16, 156, 176, 0.45);
+        }
+
+        .pd-floating-whatsapp {
+          position: fixed;
+          bottom: 28px;
+          right: 28px;
+          width: 56px;
+          height: 56px;
+          background: #25d366;
+          color: #ffffff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 6px 22px rgba(37, 211, 102, 0.4);
+          z-index: 1000;
+          text-decoration: none;
+          transition: all 0.2s ease;
+        }
+
+        .pd-floating-whatsapp:hover {
+          background: #20b858;
+          transform: scale(1.08);
+          box-shadow: 0 8px 26px rgba(37, 211, 102, 0.5);
+        }
+
+        /* Toast notification */
+        .pd-toast {
+          position: fixed;
+          top: 24px;
+          right: 24px;
+          background: #2e7d32;
+          color: #ffffff;
+          padding: 14px 22px;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          z-index: 2000;
+          font-weight: 500;
+          font-size: 15px;
+          animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+          from { transform: translateX(50px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
       `}</style>
 
-      <div className="product-detail-container">
-        <div className="breadcrumb">
-          <a href="/">
-            <ArrowLeft size={16} /> Back to Shop
-          </a>
-        </div>
+      {toastMessage && <div className="pd-toast">{toastMessage}</div>}
 
-        <div className="detail-grid">
-          {/* Gallery Side */}
-          <div className="product-gallery">
-            <img src={coverImage} alt={product.product_name} />
+      <div className="product-detail-wrapper">
+        <div className="product-detail-inner">
+          {/* Breadcrumb */}
+          <div className="pd-breadcrumb">
+            <a href="/">
+              <ArrowLeft size={16} /> Home
+            </a>
+            <span className="pd-breadcrumb-sep">/</span>
+            <span>{categoryName}</span>
+            <span className="pd-breadcrumb-sep">/</span>
+            <span className="pd-breadcrumb-current">
+              {product.product_name}
+            </span>
           </div>
 
-          {/* Info Side */}
-          <div className="product-info">
-            <h1>{product.product_name}</h1>
+          {/* Main Product Section */}
+          <div className="pd-main-grid">
+            {/* Gallery (Left) */}
+            <div className="pd-gallery-container">
+              {/* Vertical Thumbnail Strip */}
+              <div
+                className="pd-thumbnails-strip"
+                aria-label="Product thumbnails"
+              >
+                {allImages.map((imgSrc, idx) => (
+                  <div
+                    key={idx}
+                    className={`pd-thumbnail-item ${
+                      activeImage === imgSrc ? "active" : ""
+                    }`}
+                    onClick={() => setActiveImage(imgSrc)}
+                    onMouseEnter={() => setActiveImage(imgSrc)}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt={`${product.product_name} thumbnail ${idx + 1}`}
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
 
-            <div className="price-row">
-              <span className="sale-price">₹{product.offer_price}</span>
-              {product.actual_price &&
-                product.actual_price > product.offer_price && (
-                  <span className="original-price">
-                    ₹{product.actual_price}
+              {/* Showcase Main Image */}
+              <div className="pd-showcase-container">
+                <img
+                  src={activeImage}
+                  alt={product.product_name}
+                  className="pd-showcase-img"
+                />
+                <div className="pd-showcase-actions">
+                  <button
+                    type="button"
+                    className={`pd-action-icon-btn ${liked ? "active" : ""}`}
+                    aria-label="Add to wishlist"
+                    onClick={() => setLiked(!liked)}
+                  >
+                    <Heart
+                      size={20}
+                      fill={liked ? "currentColor" : "none"}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    className="pd-action-icon-btn"
+                    aria-label="Share product"
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: product.product_name,
+                          url: window.location.href,
+                        });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        showToast("Link copied to clipboard!");
+                      }
+                    }}
+                  >
+                    <Share2 size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Details (Right) */}
+            <div className="pd-info-container">
+              <h1 className="pd-product-title">{product.product_name}</h1>
+
+              {/* Pricing */}
+              <div className="pd-price-row">
+                {actualPrice > 0 && actualPrice > finalPrice && (
+                  <span className="pd-original-price">
+                    INR {formatINR(actualPrice)}
                   </span>
                 )}
-            </div>
-
-            <div
-              className="product-description"
-              dangerouslySetInnerHTML={{
-                __html: product.short_description || product.description || "",
-              }}
-            />
-
-            <div>
-              <div style={{ marginBottom: "8px", fontWeight: 500 }}>
-                Quantity
+                <span className="pd-final-price">
+                  INR {formatINR(finalPrice)}
+                </span>
+                <span className="pd-per-piece">/ Per Piece</span>
+                {discountPercent > 0 && (
+                  <span className="pd-discount-badge">
+                    ({discountPercent}% OFF)
+                  </span>
+                )}
               </div>
-              <div className="qty-selector">
-                <button
-                  className="qty-btn"
-                  onClick={() => setQty(Math.max(1, qty - 1))}
-                >
-                  -
-                </button>
-                <div className="qty-val">{qty}</div>
-                <button className="qty-btn" onClick={() => setQty(qty + 1)}>
-                  +
-                </button>
-              </div>
-            </div>
 
-            <div className="action-row">
-              <button
-                className="add-to-cart-btn"
-                onClick={addToCart}
-                disabled={adding}
-              >
-                <ShoppingBag size={20} />
-                {adding ? "Adding..." : "Add to Cart"}
-              </button>
-              <button className="icon-btn">
-                <Heart size={20} />
-              </button>
-              <button className="icon-btn">
-                <Share2 size={20} />
-              </button>
-            </div>
+              {/* Short Description */}
+              {(product.short_description || product.description) && (
+                <div className="pd-short-desc">
+                  {product.short_description || product.description}
+                </div>
+              )}
 
-            <div className="features">
-              <div className="feature-item">
-                <Truck size={24} color="#a83d22" />
-                <span>Fast & Reliable Delivery</span>
-              </div>
-              <div className="feature-item">
-                <ShieldCheck size={24} color="#a83d22" />
-                <span>Secure Payments</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {relatedProducts && relatedProducts.length > 0 && (
-          <div className="related-products-section">
-            <h2 className="related-title">You May Also Like</h2>
-            <div className="related-grid">
-              {relatedProducts.map((p, idx) => {
-                const pImage = p.cover_image
-                  ? "http://localhost:8080/" + p.cover_image
-                  : "/placeholder.png";
-                return (
-                  <a
-                    href={`/detail/${p.id}`}
-                    key={idx}
-                    className="product-card"
-                  >
-                    <div className="product-img-wrapper">
-                      <img
-                        src={pImage}
-                        alt={p.product_name}
-                        className="product-img"
+              {/* Colors Swatches */}
+              {colors.length > 0 && (
+                <div className="pd-color-section">
+                  <div className="pd-section-label">
+                    <span>Available Colors:</span>
+                    {selectedColor && (
+                      <span style={{ color: "#a83d22", fontWeight: 600 }}>
+                        {selectedColor.colour_name}
+                      </span>
+                    )}
+                  </div>
+                  <div className="pd-color-swatches">
+                    {colors.map((c) => (
+                      <div
+                        key={c.id}
+                        className={`pd-color-circle ${
+                          selectedColor?.id === c.id ? "active" : ""
+                        }`}
+                        style={{ backgroundColor: c.colour_code }}
+                        title={c.colour_name}
+                        onClick={() => setSelectedColor(c)}
                       />
-                    </div>
-                    <div className="product-info-sm">
-                      <div className="product-name-sm">{p.product_name}</div>
-                      <div className="product-price-sm">
-                        <span className="sale-price-sm">₹{p.offer_price}</span>
-                        {p.actual_price > p.offer_price && (
-                          <span className="original-price-sm">
-                            ₹{p.actual_price}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity + Add to Cart */}
+              <div className="pd-purchase-row">
+                <div className="pd-qty-selector">
+                  <button
+                    type="button"
+                    className="pd-qty-btn"
+                    aria-label="Decrease quantity"
+                    onClick={() => setQty(Math.max(1, qty - 1))}
+                  >
+                    −
+                  </button>
+                  <div className="pd-qty-value">{qty}</div>
+                  <button
+                    type="button"
+                    className="pd-qty-btn"
+                    aria-label="Increase quantity"
+                    onClick={() => setQty(qty + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  className="pd-add-to-cart-btn"
+                  onClick={addToCart}
+                  disabled={adding}
+                >
+                  <ShoppingBag size={18} />
+                  {adding ? "Adding to Cart..." : "ADD TO CART"}
+                </button>
+              </div>
+
+              {/* Specifications / Highlights (as seen in screenshot) */}
+              <div className="pd-specifications-container">
+                {product.fabric_type && (
+                  <div className="pd-spec-row">
+                    <span className="pd-spec-label">Fabric Type :</span>
+                    <span className="pd-spec-value">{product.fabric_type}</span>
+                  </div>
+                )}
+                {product.dimensions && (
+                  <div className="pd-spec-row">
+                    <span className="pd-spec-label">Dimensions :</span>
+                    <span className="pd-spec-value">{product.dimensions}</span>
+                  </div>
+                )}
+                {product.blouse_dimensions && (
+                  <div className="pd-spec-row">
+                    <span className="pd-spec-label">Blouse Dimensions :</span>
+                    <span className="pd-spec-value">
+                      {product.blouse_dimensions}
+                    </span>
+                  </div>
+                )}
+                <div className="pd-spec-row">
+                  <span className="pd-spec-label">Delivery Time :</span>
+                  <span className="pd-spec-value">
+                    {product.delivery_time || "4 to 7 Days"}
+                  </span>
+                </div>
+                <div className="pd-spec-row">
+                  <span className="pd-spec-label">Wash Care :</span>
+                  <span className="pd-spec-value">
+                    {product.wash_care ||
+                      "First wash dry clean and then hand wash with easy or shampoo"}
+                  </span>
+                </div>
+                {product.material && (
+                  <div className="pd-spec-row">
+                    <span className="pd-spec-label">Material :</span>
+                    <span className="pd-spec-value">{product.material}</span>
+                  </div>
+                )}
+                {product.pattern && (
+                  <div className="pd-spec-row">
+                    <span className="pd-spec-label">Pattern :</span>
+                    <span className="pd-spec-value">{product.pattern}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Service Badges */}
+              <div className="pd-guarantees-row">
+                <div className="pd-guarantee-item">
+                  <Truck size={20} className="pd-guarantee-icon" />
+                  <span>Fast & Insured Delivery</span>
+                </div>
+                <div className="pd-guarantee-item">
+                  <ShieldCheck size={20} className="pd-guarantee-icon" />
+                  <span>100% Authentic Handloom</span>
+                </div>
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Tabbed Content: Description, Care & Shipping, Reviews */}
+          <div className="pd-tabs-container">
+            <div className="pd-tabs-nav">
+              <button
+                type="button"
+                className={`pd-tab-btn ${
+                  activeTab === "description" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("description")}
+              >
+                Description
+              </button>
+              <button
+                type="button"
+                className={`pd-tab-btn ${
+                  activeTab === "care" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("care")}
+              >
+                Care & Shipping
+              </button>
+              <button
+                type="button"
+                className={`pd-tab-btn ${
+                  activeTab === "features" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("features")}
+              >
+                Highlights & Features
+              </button>
+            </div>
+
+            <div className="pd-tab-content">
+              {activeTab === "description" && (
+                <div>
+                  <p>
+                    {product.description ||
+                      product.short_description ||
+                      "Handcrafted with perfection by master artisans of Pawar Handloom in Maheshwar. Every weave tells a timeless tale of heritage, royal traditions, and unmatched elegance."}
+                  </p>
+                  {product.other_feature && (
+                    <div style={{ marginTop: "14px" }}>
+                      <strong>Note:</strong> {product.other_feature}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "care" && (
+                <div>
+                  <h4 style={{ margin: "0 0 10px 0", color: "#a83d22" }}>
+                    Washing & Maintenance
+                  </h4>
+                  <p>
+                    {product.wash_care ||
+                      "First wash dry clean and then hand wash with easy or mild shampoo in cold water. Do not wring or dry in direct harsh sunlight."}
+                  </p>
+                  <h4
+                    style={{
+                      margin: "20px 0 10px 0",
+                      color: "#a83d22",
+                    }}
+                  >
+                    Shipping & Delivery
+                  </h4>
+                  <p>
+                    Standard dispatch timeline is{" "}
+                    <strong>{product.delivery_time || "4 to 7 Days"}</strong>.
+                    Pan-India courier shipping with end-to-end tracking.
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "features" && (
+                <div>
+                  <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
+                    <li>
+                      <strong>Product Reference:</strong>{" "}
+                      {product.product_reference || `PH-${product.id}`}
+                    </li>
+                    <li>
+                      <strong>Handloom Origin:</strong> Maheshwar, Madhya
+                      Pradesh
+                    </li>
+                    <li>
+                      <strong>Fabric Composition:</strong>{" "}
+                      {product.fabric_type || "Pure Silk Cotton"}
+                    </li>
+                    <li>
+                      <strong>Return & Exchange:</strong>{" "}
+                      {product.other_feature || "7 Days Exchange Available"}
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Related Products */}
+          {relatedProducts.length > 0 && (
+            <div className="pd-related-section">
+              <h2 className="pd-related-title">You May Also Like</h2>
+              <div className="pd-related-grid">
+                {relatedProducts.map((rel) => {
+                  const relImage = rel.cover_image
+                    ? "http://localhost:8080/" + rel.cover_image
+                    : "/placeholder.png";
+                  const relActual = Number(rel.actual_price_customer || rel.actual_price || 0);
+                  const relOffer = Number(rel.offer_price || 0);
+                  let relFinal = relActual;
+                  if (relOffer > 0 && relOffer <= 100) {
+                    relFinal = relActual - (relActual * relOffer) / 100;
+                  } else if (relOffer > 100) {
+                    relFinal = relOffer;
+                  }
+                  return (
+                    <a
+                      key={rel.id}
+                      href={`/detail/${rel.id}`}
+                      className="pd-related-card"
+                    >
+                      <div className="pd-related-media">
+                        <img
+                          src={relImage}
+                          alt={rel.product_name}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="pd-related-body">
+                        <div
+                          className="pd-related-name"
+                          title={rel.product_name}
+                        >
+                          {rel.product_name}
+                        </div>
+                        <div className="pd-related-price">
+                          INR {formatINR(relFinal)}
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Floating Call Now Button (as in screenshot) */}
+      <a
+        href="tel:+919876543210"
+        className="pd-floating-call"
+        aria-label="Call Now"
+      >
+        <Phone size={16} fill="currentColor" />
+        <span>Call Now</span>
+      </a>
+
+      {/* Floating WhatsApp Button (as in screenshot) */}
+      <a
+        href={`https://api.whatsapp.com/send?phone=919876543210&text=${whatsappMessage}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="pd-floating-whatsapp"
+        aria-label="Chat on WhatsApp"
+      >
+        <MessageCircle size={28} fill="currentColor" />
+      </a>
     </>
   );
 }
