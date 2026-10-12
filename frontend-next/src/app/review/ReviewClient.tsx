@@ -13,16 +13,15 @@ import {
   Filter,
   ArrowUpDown,
   Sparkles,
-  Heart,
   Store,
   ShoppingBag,
-  ExternalLink,
   ChevronRight,
   MessageSquarePlus,
   Play,
+  ChevronLeft,
 } from "lucide-react";
 
-interface ReviewItem {
+export interface ReviewItem {
   id: number;
   product_id?: number;
   product_name?: string;
@@ -40,134 +39,24 @@ interface ReviewItem {
   YouTube_url?: string;
 }
 
-const INITIAL_REVIEWS: ReviewItem[] = [
-  {
-    id: 1,
-    product_id: 101,
-    product_name: "Pure Silk Cotton Maheshwari Saree - Bugdi Border",
-    name: "Sunita Deshmukh",
-    rating: 5,
-    review_title: "Exquisite craftsmanship and royal texture!",
-    review_text:
-      "Ordered this gorgeous saree for my daughter's wedding reception. The gold bugdi border glistens gracefully under the evening lights and the silk-cotton blend draped effortlessly throughout the night. Everyone asked where we acquired it. Pawar Handloom is genuine heritage!",
-    review_type: 1,
-    likes: 24,
-    created_at: "2026-09-28",
-    location: "Indore, MP",
-    verified: true,
-    review_images: [
-      "/la01.jpeg",
-      "/la02.jpeg",
-    ],
-  },
-  {
-    id: 2,
-    product_id: 0,
-    name: "Pooja Sharma",
-    rating: 5,
-    review_title: "Unmatched customer service & speedy delivery",
-    review_text:
-      "I had requested custom fall-pico and express shipping to Mumbai. The team accommodated my request with immense warmth and kept me updated on WhatsApp with dispatch video clips. The packaging was royal with a sweet personal thank-you card. Will definitely be a lifelong customer!",
-    review_type: 2,
-    likes: 18,
-    created_at: "2026-09-25",
-    location: "Mumbai, MH",
-    verified: true,
-    review_images: [
-      "/coll01.png",
-    ],
-  },
-  {
-    id: 3,
-    product_id: 104,
-    product_name: "Chanderi Handblock Printed Suit Set",
-    name: "Dr. Ananya Sen",
-    rating: 5,
-    review_title: "Authentic weaves, breathably comfortable",
-    review_text:
-      "As a doctor who wears ethnic wear to clinic every day, comfort and elegance are top priorities. The fabric is light, pure, and has that signature crisp Maheshwar feel without any synthetic blend. Truly heirloom quality.",
-    review_type: 1,
-    likes: 15,
-    created_at: "2026-09-20",
-    location: "Kolkata, WB",
-    verified: true,
-    review_images: [
-      "/la03.jpeg",
-    ],
-  },
-  {
-    id: 4,
-    product_id: 108,
-    product_name: "Tissue Zari Maheshwari Saree",
-    name: "Meenakshi Iyer",
-    rating: 5,
-    review_title: "The tissue zari weave is pure poetry",
-    review_text:
-      "The delicate shimmer of the silver and golden zari wave pattern is stunning. It feels feather-light yet carries a stately regal presence. Very rare to find authentic weavers dedicated to this standard online.",
-    review_type: 1,
-    likes: 12,
-    created_at: "2026-09-15",
-    location: "Bengaluru, KA",
-    verified: true,
-    review_images: [
-      "/la04.jpeg",
-      "/la05.jpeg",
-    ],
-  },
-  {
-    id: 5,
-    product_id: 0,
-    name: "Ritu Verma",
-    rating: 5,
-    review_title: "Flawless shopping experience from start to finish",
-    review_text:
-      "Transparent pricing, authentic artisan background, and exact shade matching the website images. The parcel arrived neatly boxed in pristine condition. Highly recommended to all saree connoisseurs!",
-    review_type: 2,
-    likes: 9,
-    created_at: "2026-09-12",
-    location: "New Delhi",
-    verified: true,
-    review_images: [],
-  },
-  {
-    id: 6,
-    product_id: 112,
-    product_name: "Pure Mulberry Silk Handloom Saree",
-    name: "Kavita Rao",
-    rating: 4,
-    review_title: "Rich drape, beautiful natural sheen",
-    review_text:
-      "The color vibrancy was even deeper in person than on my monitor screen. A touch stiff upon first unboxing, but after a gentle airing and drape it fell like butter. 4.5 stars for quality and craftsmanship.",
-    review_type: 1,
-    likes: 7,
-    created_at: "2026-09-08",
-    location: "Hyderabad, TS",
-    verified: true,
-    review_images: [
-      "/la06.jpeg",
-    ],
-  },
-  {
-    id: 7,
-    product_id: 0,
-    name: "Archana J.",
-    rating: 5,
-    review_title: "Visiting the Maheshwar workshop was inspiring",
-    review_text:
-      "Had ordered earlier and recently visited their store in Maheshwar. Seeing the master karigars work on the pit looms reaffirmed why Pawar Handloom is so special. Great respect for keeping this centuries-old art alive.",
-    review_type: 2,
-    likes: 21,
-    created_at: "2026-08-30",
-    location: "Pune, MH",
-    verified: true,
-    review_images: [
-      "/coll.png",
-    ],
-  },
-];
+interface ReviewStats {
+  totalReviews: number;
+  averageRating: number;
+  ratingCounts: Record<number, number>;
+}
 
-export default function ReviewClient() {
-  const [reviews, setReviews] = useState<ReviewItem[]>(INITIAL_REVIEWS);
+interface Props {
+  initialReviews?: ReviewItem[];
+  initialStats?: ReviewStats;
+  productsList?: { id: number; name: string }[];
+}
+
+export default function ReviewClient({
+  initialReviews = [],
+  initialStats,
+  productsList = [],
+}: Props) {
+  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const [activeTab, setActiveTab] = useState<"all" | "product" | "shop" | "photos">("all");
   const [ratingFilter, setRatingFilter] = useState<number | 0>(0);
   const [sortBy, setSortBy] = useState<"newest" | "highest" | "helpful">("newest");
@@ -177,6 +66,7 @@ export default function ReviewClient() {
   // Write Review Modal / Drawer state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formType, setFormType] = useState<1 | 2>(2); // 2 = Store, 1 = Product
+  const [formProductId, setFormProductId] = useState<number>(0);
   const [formRating, setFormRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [formTitle, setFormTitle] = useState("");
@@ -184,19 +74,24 @@ export default function ReviewClient() {
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formYoutube, setFormYoutube] = useState("");
-  const [formImageFiles, setFormImageFiles] = useState<string[]>([]);
+  const [formImageFiles, setFormImageFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Lightbox preview modal state
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
+  // Carousel current index map for reviews with multiple images
+  const [carouselIndexMap, setCarouselIndexMap] = useState<Record<number, number>>({});
+
   // Statistics calculation
   const totalReviews = reviews.length;
   const ratingCounts = useMemo(() => {
     const counts: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     reviews.forEach((r) => {
-      counts[r.rating] = (counts[r.rating] || 0) + 1;
+      const star = Math.max(1, Math.min(5, Math.round(r.rating)));
+      counts[star] = (counts[star] || 0) + 1;
     });
     return counts;
   }, [reviews]);
@@ -207,15 +102,31 @@ export default function ReviewClient() {
     return Number((sum / totalReviews).toFixed(1));
   }, [reviews, totalReviews]);
 
-  // Handle like button toggle
-  const handleLike = (id: number) => {
-    const isCurrentlyLiked = likedMap[id];
-    setLikedMap((prev) => ({ ...prev, [id]: !isCurrentlyLiked }));
+  // Handle live like button toggle (calls /api/review/like)
+  const handleLike = async (id: number) => {
+    if (likedMap[id]) return; // already liked in this session
+
+    // Optimistically update
+    setLikedMap((prev) => ({ ...prev, [id]: true }));
     setReviews((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, likes: isCurrentlyLiked ? r.likes - 1 : r.likes + 1 } : r
-      )
+      prev.map((r) => (r.id === id ? { ...r, likes: r.likes + 1 } : r))
     );
+
+    try {
+      const res = await fetch("/api/review/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.status === "success" && typeof data.likes === "number") {
+        setReviews((prev) =>
+          prev.map((r) => (r.id === id ? { ...r, likes: data.likes } : r))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update like in DB:", err);
+    }
   };
 
   // Filtered and Sorted Reviews
@@ -229,15 +140,15 @@ export default function ReviewClient() {
           return false;
 
         // Rating filter
-        if (ratingFilter > 0 && r.rating !== ratingFilter) return false;
+        if (ratingFilter > 0 && Math.round(r.rating) !== ratingFilter) return false;
 
         // Search query
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          const matchTitle = r.review_title.toLowerCase().includes(q);
-          const matchText = r.review_text.toLowerCase().includes(q);
-          const matchName = r.name.toLowerCase().includes(q);
-          const matchProduct = r.product_name?.toLowerCase().includes(q);
+          const matchTitle = (r.review_title || "").toLowerCase().includes(q);
+          const matchText = (r.review_text || "").toLowerCase().includes(q);
+          const matchName = (r.name || "").toLowerCase().includes(q);
+          const matchProduct = (r.product_name || "").toLowerCase().includes(q);
           if (!matchTitle && !matchText && !matchName && !matchProduct) return false;
         }
 
@@ -251,8 +162,8 @@ export default function ReviewClient() {
       });
   }, [reviews, activeTab, ratingFilter, sortBy, searchQuery]);
 
-  // Handle Form Submission
-  const handleSubmitReview = (e: React.FormEvent) => {
+  // Handle Form Submission (calls /api/review/save)
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formText.trim() || !formName.trim()) {
       alert("Please fill in the required fields: Title, Review, and Name.");
@@ -261,51 +172,94 @@ export default function ReviewClient() {
 
     setIsSubmitting(true);
 
-    // Mock API call simulation
-    setTimeout(() => {
-      const newReview: ReviewItem = {
-        id: Date.now(),
-        name: formName,
-        email: formEmail,
-        rating: formRating,
-        review_title: formTitle,
-        review_text: formText,
-        review_type: formType,
-        likes: 0,
-        created_at: new Date().toISOString().split("T")[0],
-        location: "India",
-        verified: true,
-        review_images: formImageFiles.length > 0 ? formImageFiles : undefined,
-        YouTube_url: formYoutube || undefined,
-        product_name: formType === 1 ? "Maheshwari Handloom Ensemble" : undefined,
-      };
+    try {
+      const fd = new FormData();
+      fd.append("rating", String(formRating));
+      fd.append("review_title", formTitle.trim());
+      fd.append("review_text", formText.trim());
+      fd.append("review_type", String(formType));
+      fd.append("product_id", String(formType === 1 ? formProductId : 0));
+      fd.append("user_id", "0");
+      fd.append("name", formName.trim());
+      fd.append("email", formEmail.trim());
+      fd.append("YouTube_url", formYoutube.trim());
 
-      setReviews([newReview, ...reviews]);
+      // Append real image files
+      formImageFiles.forEach((file) => {
+        fd.append("review_images", file);
+      });
+
+      const res = await fetch("/api/review/save", {
+        method: "POST",
+        body: fd,
+      });
+
+      const result = await res.json();
+
+      if (result.status === "success" && result.review) {
+        const savedReview: ReviewItem = {
+          id: result.review.id,
+          product_id: result.review.product_id,
+          product_name:
+            formType === 1
+              ? productsList.find((p) => p.id === formProductId)?.name || "Handloom Product"
+              : undefined,
+          name: result.review.name,
+          email: result.review.email,
+          rating: result.review.rating,
+          review_title: result.review.review_title,
+          review_text: result.review.review_text,
+          review_type: result.review.review_type,
+          likes: 0,
+          created_at: new Date().toISOString().split("T")[0],
+          location: "Verified Patron",
+          verified: true,
+          review_images: (result.review.review_images || []).map(
+            (img: string) => `http://localhost:8080/uploads/review_images/${img}`
+          ),
+          YouTube_url: result.review.YouTube_url,
+        };
+
+        setReviews((prev) => [savedReview, ...prev]);
+        setSubmitSuccess(true);
+
+        setTimeout(() => {
+          setSubmitSuccess(false);
+          setIsFormOpen(false);
+          // Reset form fields
+          setFormTitle("");
+          setFormText("");
+          setFormName("");
+          setFormEmail("");
+          setFormYoutube("");
+          setFormImageFiles([]);
+          setImagePreviewUrls([]);
+          setFormRating(5);
+        }, 1600);
+      } else {
+        alert(result.message || "Failed to submit review.");
+      }
+    } catch (err: any) {
+      console.error("Submission failed:", err);
+      alert("Error submitting review. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      setSubmitSuccess(true);
-
-      setTimeout(() => {
-        setSubmitSuccess(false);
-        setIsFormOpen(false);
-        // Reset form
-        setFormTitle("");
-        setFormText("");
-        setFormName("");
-        setFormEmail("");
-        setFormYoutube("");
-        setFormImageFiles([]);
-        setFormRating(5);
-      }, 1500);
-    }, 700);
+    }
   };
 
-  // Mock image upload handler
+  // Image upload handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const fileList = Array.from(e.target.files);
-      const newUrls = fileList.map((file) => URL.createObjectURL(file));
-      setFormImageFiles((prev) => [...prev, ...newUrls]);
+      const files = Array.from(e.target.files);
+      setFormImageFiles((prev) => [...prev, ...files]);
+      const urls = files.map((f) => URL.createObjectURL(f));
+      setImagePreviewUrls((prev) => [...prev, ...urls]);
     }
+  };
+
+  const removeUploadImage = (idx: number) => {
+    setFormImageFiles((prev) => prev.filter((_, i) => i !== idx));
+    setImagePreviewUrls((prev) => prev.filter((_, i) => i !== idx));
   };
 
   return (
@@ -374,8 +328,8 @@ export default function ReviewClient() {
               margin: "0 auto 28px",
             }}
           >
-            Read candid thoughts, unboxing moments, and timeless stories from our community of
-            Maheshwari and Chanderi handloom collectors across the world.
+            Authentic customer reviews, feedback, and unboxing impressions for our pure handwoven
+            Maheshwari and Chanderi sarees.
           </p>
 
           <div
@@ -396,10 +350,10 @@ export default function ReviewClient() {
               ))}
             </div>
             <span style={{ fontWeight: 600, fontSize: "1rem", color: "#fff" }}>
-              {averageRating} out of 5.0
+              {averageRating > 0 ? averageRating : "5.0"} out of 5.0
             </span>
             <span style={{ color: "#d1c7bc", fontSize: "0.9rem" }}>
-              ({totalReviews} Verified Stories)
+              ({totalReviews} Verified Reviews)
             </span>
           </div>
         </div>
@@ -433,7 +387,7 @@ export default function ReviewClient() {
                 lineHeight: 1,
               }}
             >
-              {averageRating}
+              {averageRating > 0 ? averageRating : "5.0"}
             </div>
             <div
               style={{
@@ -448,8 +402,8 @@ export default function ReviewClient() {
                 <Star
                   key={star}
                   size={22}
-                  fill={star <= Math.round(averageRating) ? "#f59e0b" : "none"}
-                  strokeWidth={star <= Math.round(averageRating) ? 0 : 1.5}
+                  fill={star <= Math.round(averageRating || 5) ? "#f59e0b" : "none"}
+                  strokeWidth={star <= Math.round(averageRating || 5) ? 0 : 1.5}
                 />
               ))}
             </div>
@@ -470,7 +424,7 @@ export default function ReviewClient() {
                 fontWeight: 600,
               }}
             >
-              <CheckCircle2 size={15} /> 99% Recommended Rate
+              <CheckCircle2 size={15} /> 100% Genuine Weaves
             </div>
           </div>
 
@@ -580,10 +534,10 @@ export default function ReviewClient() {
                 fontFamily: "var(--font-serif)",
               }}
             >
-              Have You Weaved a Memory?
+              Share Your Review
             </h3>
             <p style={{ color: "#666", fontSize: "0.88rem", marginBottom: "18px", maxWidth: "260px" }}>
-              Share your feedback or drape photos with us and inspire fellow textile lovers.
+              Help other saree lovers with your feedback and experience.
             </p>
             <button
               onClick={() => setIsFormOpen(true)}
@@ -616,98 +570,6 @@ export default function ReviewClient() {
           </div>
         </div>
 
-        {/* ── UGC CUSTOMER GALLERY STRIP ── */}
-        <div style={{ marginBottom: "40px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Camera size={20} color="#b8860b" />
-              <h3
-                style={{
-                  fontSize: "1.25rem",
-                  color: "#222",
-                  fontWeight: 700,
-                  fontFamily: "var(--font-serif)",
-                  margin: 0,
-                }}
-              >
-                Customer Moments & Drape Photos
-              </h3>
-            </div>
-            <span style={{ fontSize: "0.85rem", color: "#888" }}>
-              Real photos shared by our patrons
-            </span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "14px",
-              overflowX: "auto",
-              paddingBottom: "10px",
-              scrollbarWidth: "thin",
-            }}
-          >
-            {[
-              { img: "/la01.jpeg", name: "Sunita D.", title: "Silk Cotton Saree" },
-              { img: "/la02.jpeg", name: "Pallavi T.", title: "Bugdi Border" },
-              { img: "/la03.jpeg", name: "Dr. Ananya", title: "Handblock Suit" },
-              { img: "/la04.jpeg", name: "Meenakshi I.", title: "Tissue Zari Saree" },
-              { img: "/la05.jpeg", name: "Swetha R.", title: "Royal Gold Zari" },
-              { img: "/la06.jpeg", name: "Kavita R.", title: "Mulberry Silk" },
-              { img: "/coll01.png", name: "Pooja S.", title: "Wedding Drape" },
-            ].map((pic, idx) => (
-              <div
-                key={idx}
-                onClick={() => setLightboxImg(pic.img)}
-                style={{
-                  flex: "0 0 160px",
-                  height: "200px",
-                  borderRadius: "14px",
-                  overflow: "hidden",
-                  position: "relative",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                }}
-              >
-                <img
-                  src={pic.img}
-                  alt={pic.title}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 0.4s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.08)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    padding: "10px",
-                    color: "#fff",
-                  }}
-                >
-                  <span style={{ fontSize: "0.8rem", fontWeight: 700 }}>{pic.name}</span>
-                  <span style={{ fontSize: "0.7rem", opacity: 0.85 }}>{pic.title}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* ── FILTER & SORT CONTROLS ── */}
         <div
           style={{
@@ -723,7 +585,7 @@ export default function ReviewClient() {
             border: "1px solid #ede3d3",
           }}
         >
-          {/* Tabs */}
+          {/* Tabs matching old site: Product Reviews & Shop Reviews */}
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             {[
               { id: "all", label: `All Reviews (${totalReviews})` },
@@ -733,7 +595,7 @@ export default function ReviewClient() {
               },
               {
                 id: "shop",
-                label: `Store Reviews (${reviews.filter((r) => r.review_type === 2).length})`,
+                label: `Shop Reviews (${reviews.filter((r) => r.review_type === 2).length})`,
               },
               {
                 id: "photos",
@@ -800,7 +662,7 @@ export default function ReviewClient() {
               )}
             </div>
 
-            {/* Rating Filter */}
+            {/* Rating Filter Tag */}
             {ratingFilter > 0 && (
               <button
                 onClick={() => setRatingFilter(0)}
@@ -869,17 +731,13 @@ export default function ReviewClient() {
           >
             <MessageSquarePlus size={44} color="#b8860b" style={{ marginBottom: "12px" }} />
             <h3 style={{ fontSize: "1.3rem", color: "#333", fontWeight: 700 }}>
-              No reviews match your selected filter
+              No reviews found
             </h3>
             <p style={{ color: "#777", fontSize: "0.9rem", marginBottom: "20px" }}>
-              Try adjusting your rating or search query to see other customer stories.
+              Be the first to write a review!
             </p>
             <button
-              onClick={() => {
-                setActiveTab("all");
-                setRatingFilter(0);
-                setSearchQuery("");
-              }}
+              onClick={() => setIsFormOpen(true)}
               style={{
                 background: "#b8860b",
                 color: "#fff",
@@ -891,7 +749,7 @@ export default function ReviewClient() {
                 cursor: "pointer",
               }}
             >
-              Reset Filters
+              Write a Review
             </button>
           </div>
         ) : (
@@ -904,6 +762,8 @@ export default function ReviewClient() {
           >
             {filteredReviews.map((review) => {
               const isLiked = likedMap[review.id];
+              const images = review.review_images || [];
+              const currentImgIdx = carouselIndexMap[review.id] || 0;
 
               return (
                 <div
@@ -956,7 +816,7 @@ export default function ReviewClient() {
                             boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                           }}
                         >
-                          {review.name
+                          {(review.name || "Customer")
                             .split(" ")
                             .map((n) => n[0])
                             .slice(0, 2)
@@ -973,7 +833,7 @@ export default function ReviewClient() {
                               gap: "6px",
                             }}
                           >
-                            {review.name}
+                            {review.name || "Customer"}
                             {review.verified && (
                               <CheckCircle2
                                 size={14}
@@ -983,7 +843,6 @@ export default function ReviewClient() {
                             )}
                           </div>
                           <span style={{ fontSize: "0.8rem", color: "#888" }}>
-                            {review.location || "Verified Patron"} •{" "}
                             {new Date(review.created_at).toLocaleDateString("en-IN", {
                               day: "numeric",
                               month: "short",
@@ -993,7 +852,7 @@ export default function ReviewClient() {
                         </div>
                       </div>
 
-                      {/* Review Type Badge */}
+                      {/* Review Type Badge (matching old site: About Product / About Shop) */}
                       <span
                         style={{
                           fontSize: "0.75rem",
@@ -1009,11 +868,11 @@ export default function ReviewClient() {
                       >
                         {review.review_type === 1 ? (
                           <>
-                            <ShoppingBag size={12} /> Product
+                            <ShoppingBag size={12} /> About Product
                           </>
                         ) : (
                           <>
-                            <Store size={12} /> Store
+                            <Store size={12} /> About Shop
                           </>
                         )}
                       </span>
@@ -1091,42 +950,112 @@ export default function ReviewClient() {
                           gap: "6px",
                         }}
                       >
-                        <span style={{ fontWeight: 600, color: "#444" }}>Item:</span>{" "}
+                        <span style={{ fontWeight: 600, color: "#444" }}>Product:</span>{" "}
                         {review.product_name}
                       </div>
                     )}
 
-                    {/* Review Images */}
-                    {review.review_images && review.review_images.length > 0 && (
+                    {/* Image Carousel (matching old site's multi-image carousel) */}
+                    {images.length > 0 && (
                       <div
                         style={{
-                          display: "flex",
-                          gap: "8px",
+                          position: "relative",
+                          width: "100%",
+                          height: "220px",
+                          borderRadius: "12px",
+                          overflow: "hidden",
                           marginBottom: "16px",
-                          flexWrap: "wrap",
+                          background: "#f7f7f7",
                         }}
                       >
-                        {review.review_images.map((img, i) => (
-                          <div
-                            key={i}
-                            onClick={() => setLightboxImg(img)}
-                            style={{
-                              width: "72px",
-                              height: "72px",
-                              borderRadius: "8px",
-                              overflow: "hidden",
-                              cursor: "pointer",
-                              border: "1px solid #e5dccf",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-                            }}
-                          >
-                            <img
-                              src={img}
-                              alt="Review thumbnail"
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          </div>
-                        ))}
+                        <img
+                          src={images[currentImgIdx % images.length]}
+                          alt="Review attachment"
+                          onClick={() => setLightboxImg(images[currentImgIdx % images.length])}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            cursor: "zoom-in",
+                          }}
+                        />
+
+                        {images.length > 1 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCarouselIndexMap((prev) => ({
+                                  ...prev,
+                                  [review.id]:
+                                    (currentImgIdx - 1 + images.length) % images.length,
+                                }));
+                              }}
+                              style={{
+                                position: "absolute",
+                                left: 8,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                background: "rgba(0,0,0,0.5)",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "50%",
+                                width: "28px",
+                                height: "28px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <ChevronLeft size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCarouselIndexMap((prev) => ({
+                                  ...prev,
+                                  [review.id]: (currentImgIdx + 1) % images.length,
+                                }));
+                              }}
+                              style={{
+                                position: "absolute",
+                                right: 8,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                background: "rgba(0,0,0,0.5)",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "50%",
+                                width: "28px",
+                                height: "28px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: 8,
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                background: "rgba(0,0,0,0.6)",
+                                color: "#fff",
+                                padding: "2px 8px",
+                                borderRadius: "10px",
+                                fontSize: "0.75rem",
+                              }}
+                            >
+                              {currentImgIdx + 1} / {images.length}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
 
@@ -1152,7 +1081,7 @@ export default function ReviewClient() {
                     )}
                   </div>
 
-                  {/* Card Footer: Helpful Like Button */}
+                  {/* Card Footer: Helpful Like Button (matching CodeIgniter like AJAX) */}
                   <div
                     style={{
                       borderTop: "1px solid #f5ede0",
@@ -1282,8 +1211,7 @@ export default function ReviewClient() {
                   Thank You, {formName}!
                 </h3>
                 <p style={{ color: "#666", fontSize: "0.95rem" }}>
-                  Your review has been submitted successfully. It celebrates the karigars and
-                  helps other patrons make confident choices!
+                  Your review has been saved to the database. It is now live on the store!
                 </p>
               </div>
             ) : (
@@ -1312,12 +1240,11 @@ export default function ReviewClient() {
                     Write a Review
                   </h2>
                   <p style={{ color: "#777", fontSize: "0.9rem", margin: 0 }}>
-                    Please share details about the drape, weave quality, texture, and overall
-                    service.
+                    Please share details about your drape, weave texture, packaging, and overall service.
                   </p>
                 </div>
 
-                {/* Review Type Choice */}
+                {/* Review Type Choice (matching CodeIgniter review_type: 1 or 2) */}
                 <div style={{ marginBottom: "20px" }}>
                   <label
                     style={{
@@ -1328,7 +1255,7 @@ export default function ReviewClient() {
                       marginBottom: "8px",
                     }}
                   >
-                    What would you like to review?
+                    Review Type *
                   </label>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                     <button
@@ -1349,7 +1276,7 @@ export default function ReviewClient() {
                         gap: "6px",
                       }}
                     >
-                      <Store size={16} /> Store Experience
+                      <Store size={16} /> Store Review
                     </button>
                     <button
                       type="button"
@@ -1369,10 +1296,47 @@ export default function ReviewClient() {
                         gap: "6px",
                       }}
                     >
-                      <ShoppingBag size={16} /> Saree / Product
+                      <ShoppingBag size={16} /> Product Review
                     </button>
                   </div>
                 </div>
+
+                {/* If Product Review is selected, show Product Dropdown */}
+                {formType === 1 && productsList.length > 0 && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        color: "#444",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Select Saree / Product *
+                    </label>
+                    <select
+                      value={formProductId}
+                      onChange={(e) => setFormProductId(Number(e.target.value))}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        border: "1px solid #dcd3c5",
+                        outline: "none",
+                        fontSize: "0.9rem",
+                        background: "#fff",
+                      }}
+                    >
+                      <option value={0}>General Product Review</option>
+                      {productsList.map((prod) => (
+                        <option key={prod.id} value={prod.id}>
+                          {prod.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {/* Interactive Star Rating */}
                 <div style={{ marginBottom: "22px" }}>
@@ -1522,7 +1486,7 @@ export default function ReviewClient() {
                   >
                     <Upload size={24} color="#b8860b" style={{ marginBottom: "6px" }} />
                     <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#555" }}>
-                      Upload drape photos or parcel unboxing
+                      Upload photos from your device
                     </span>
                     <span style={{ fontSize: "0.75rem", color: "#888" }}>
                       PNG, JPG up to 10MB
@@ -1537,9 +1501,9 @@ export default function ReviewClient() {
                   </label>
 
                   {/* Uploaded thumbnails */}
-                  {formImageFiles.length > 0 && (
+                  {imagePreviewUrls.length > 0 && (
                     <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
-                      {formImageFiles.map((url, i) => (
+                      {imagePreviewUrls.map((url, i) => (
                         <div
                           key={i}
                           style={{
@@ -1557,9 +1521,7 @@ export default function ReviewClient() {
                           />
                           <button
                             type="button"
-                            onClick={() =>
-                              setFormImageFiles(formImageFiles.filter((_, idx) => idx !== i))
-                            }
+                            onClick={() => removeUploadImage(i)}
                             style={{
                               position: "absolute",
                               top: 2,
@@ -1639,7 +1601,7 @@ export default function ReviewClient() {
                       required
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
-                      placeholder="e.g. Priyadarshini K."
+                      placeholder="e.g. Swetha Reddy"
                       style={{
                         width: "100%",
                         padding: "10px 14px",
@@ -1667,7 +1629,7 @@ export default function ReviewClient() {
                       required
                       value={formEmail}
                       onChange={(e) => setFormEmail(e.target.value)}
-                      placeholder="priya@example.com"
+                      placeholder="swetha@example.com"
                       style={{
                         width: "100%",
                         padding: "10px 14px",
