@@ -102,64 +102,7 @@ export default function CartClient() {
           gap: 40px;
           align-items: start;
         }
-        @media (max-width: 900px) {
-          .cart-layout {
-            grid-template-columns: 1fr;
-          }
-          .cart-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-          }
-          .cart-title {
-            font-size: 32px;
-            line-height: 1.2;
-          }
-          .cart-table {
-            min-width: 100%;
-          }
-          .cart-table thead {
-            display: none;
-          }
-          .cart-table tbody, .cart-table tr, .cart-table td {
-            display: block;
-            width: 100%;
-          }
-          .cart-table tr {
-            position: relative;
-            padding-bottom: 24px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid #ede3c9;
-          }
-          .cart-table td {
-            padding: 0;
-            border: none;
-          }
-          .cart-product-cell {
-            align-items: flex-start;
-          }
-          .cart-table td.center {
-            text-align: left;
-            padding-top: 16px;
-            padding-left: 124px; /* Align with text next to image (100px width + 24px gap) */
-          }
-          .cart-table td.right {
-            text-align: right;
-            position: absolute;
-            bottom: 24px;
-            right: 0;
-          }
-          .cart-item-total {
-            font-size: 18px;
-          }
-          .cart-remove-btn {
-            margin-top: 8px;
-            margin-left: auto;
-          }
-          .cart-summary {
-            padding: 24px;
-          }
-        }
+
         .cart-table-wrapper {
           overflow-x: auto;
         }
@@ -310,6 +253,67 @@ export default function CartClient() {
         .checkout-btn:hover {
           background: #8a2f17;
         }
+        @media (max-width: 900px) {
+          .cart-layout {
+            grid-template-columns: 1fr;
+          }
+          .cart-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+          .cart-title {
+            font-size: 32px;
+            line-height: 1.2;
+          }
+          .cart-table {
+            min-width: 100% !important;
+          }
+          .cart-table thead {
+            display: none;
+          }
+          .cart-table tbody, .cart-table tr, .cart-table td {
+            display: block;
+            width: 100%;
+          }
+          .cart-table tr {
+            position: relative;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #ede3c9;
+          }
+          .cart-table td {
+            padding: 0;
+            border: none;
+          }
+          .cart-product-cell {
+            align-items: flex-start;
+          }
+          .cart-table td.center {
+            text-align: left;
+            padding-top: 16px;
+            padding-left: 124px; /* Align with text next to image (100px width + 24px gap) */
+          }
+          .cart-qty-badge {
+            margin: 0;
+          }
+          .cart-table td.right {
+            text-align: right;
+            position: absolute;
+            bottom: 24px;
+            right: 0;
+          }
+          .cart-item-total {
+            font-size: 18px;
+          }
+          .cart-remove-btn {
+            margin-top: 8px;
+            margin-left: auto;
+          }
+          .cart-summary {
+            padding: 24px;
+          }
+        }
       `}</style>
       <div className="cart-container">
         <div className="cart-header">
@@ -342,9 +346,13 @@ export default function CartClient() {
                     <tr key={idx}>
                       <td>
                         <div className="cart-product-cell">
-                          <img src={item.image} alt={item.product_name} className="cart-product-img" />
+                          <a href={`/detail/${item.id}`}>
+                            <img src={item.image} alt={item.product_name} className="cart-product-img" />
+                          </a>
                           <div>
-                            <h3 className="cart-product-name">{item.product_name}</h3>
+                            <a href={`/detail/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <h3 className="cart-product-name">{item.product_name}</h3>
+                            </a>
                             <p className="cart-product-price">₹{item.offer_price}</p>
                             {item.color && (
                               <p style={{ color: "#777", fontSize: "14px", marginTop: "8px" }}>Color: <span style={{ color: "#333" }}>{item.color}</span></p>
@@ -423,7 +431,9 @@ export default function CartClient() {
                 <span>Total</span>
                 <span className="price">₹{cart.subTotal}</span>
               </div>
-              <button className="checkout-btn">Secure Checkout</button>
+              <a href="/checkout" style={{ textDecoration: 'none' }}>
+                <button className="checkout-btn" style={{ width: '100%' }}>Secure Checkout</button>
+              </a>
               <div style={{ textAlign: "center", fontSize: "14px", color: "#888", marginTop: "16px" }}>
                 Taxes included. Shipping calculated at checkout.
               </div>
