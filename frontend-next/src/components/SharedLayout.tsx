@@ -365,9 +365,6 @@ export default function SharedLayout({
                 <a href="/shop/7">Best Seller</a>
               </li>
               <li>
-                <a href="#">Same Day Dispatch</a>
-              </li>
-              <li>
                 <a href="/shop/2">Lehenga</a>
               </li>
               <li>
@@ -460,9 +457,6 @@ export default function SharedLayout({
               </li>
               <li>
                 <a href="/shop/7">Best Seller</a>
-              </li>
-              <li>
-                <a href="#">Same Day Dispatch</a>
               </li>
               <li>
                 <a href="/shop/2">

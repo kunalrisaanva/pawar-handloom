@@ -1713,9 +1713,6 @@ export default function Index({
                 <a href="/shop/7">Best Seller</a>
               </li>
               <li>
-                <a href="#">Same Day Dispatch</a>
-              </li>
-              <li>
                 <a href="/shop/2">Sarees</a>
               </li>
               <li><a href="/#dress-materials">Dress Materials</a></li>
@@ -1798,7 +1795,6 @@ export default function Index({
             <ul>
               <li><a href="/new-arrivals">New Arrival</a></li>
               <li><a href="/shop/7">Best Seller</a></li>
-              <li><a href="#">Same Day Dispatch</a></li>
               <li><a href="/shop/2">Sarees</a></li>
               <li><a href="/#dress-materials" onClick={() => setMobileMenuOpen(false)}>Dress Materials</a></li>
               <li><a href="/shop/2">Shop All</a></li>
