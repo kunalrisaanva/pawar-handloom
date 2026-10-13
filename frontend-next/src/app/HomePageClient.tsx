@@ -1646,10 +1646,13 @@ export default function Index({
                 <span className="cart-badge">{cartCount}</span>
               </a>
               <div className="user-dropdown">
-                <a href="/login">
+                <a href="/profile" title="My Profile">
                   <User size={20} />
                 </a>
                 <ul className="user-dropdown-menu">
+                  <li>
+                    <a href="/profile">My Profile</a>
+                  </li>
                   <li>
                     <a href="/register">Resellers Register</a>
                   </li>
