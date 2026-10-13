@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   ShoppingBag,
@@ -19,6 +19,12 @@ import {
   ThumbsUp,
   Upload,
   X,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
 } from "lucide-react";
 
 interface ColorItem {
@@ -77,6 +83,83 @@ export default function ProductDetailClient({
   const [liked, setLiked] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("description");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Amazon & Flipkart style Image Zoom state
+  const [isZooming, setIsZooming] = useState<boolean>(false);
+  const [zoomPos, setZoomPos] = useState({
+    lensX: 0,
+    lensY: 0,
+    xPercent: 0,
+    yPercent: 0,
+    cursorX: 50,
+    cursorY: 50,
+  });
+
+  // Fullscreen Lightbox Modal state
+  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+  const [lightboxScale, setLightboxScale] = useState<number>(1);
+
+  const handleShowcaseMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const lensW = 160;
+    const lensH = 160;
+
+    let lensX = x - lensW / 2;
+    let lensY = y - lensH / 2;
+
+    const maxLensX = Math.max(0, rect.width - lensW);
+    const maxLensY = Math.max(0, rect.height - lensH);
+
+    if (lensX < 0) lensX = 0;
+    if (lensY < 0) lensY = 0;
+    if (lensX > maxLensX) lensX = maxLensX;
+    if (lensY > maxLensY) lensY = maxLensY;
+
+    const xPercent = maxLensX > 0 ? (lensX / maxLensX) * 100 : 0;
+    const yPercent = maxLensY > 0 ? (lensY / maxLensY) * 100 : 0;
+
+    const cursorX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    const cursorY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+
+    setZoomPos({
+      lensX,
+      lensY,
+      xPercent,
+      yPercent,
+      cursorX,
+      cursorY,
+    });
+  };
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const currentIdx = Math.max(0, allImages.indexOf(activeImage));
+    const prevIdx = (currentIdx - 1 + allImages.length) % allImages.length;
+    setActiveImage(allImages[prevIdx]);
+    setLightboxScale(1);
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const currentIdx = Math.max(0, allImages.indexOf(activeImage));
+    const nextIdx = (currentIdx + 1) % allImages.length;
+    setActiveImage(allImages[nextIdx]);
+    setLightboxScale(1);
+  };
+
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      if (e.key === "ArrowLeft") handlePrevImage();
+      if (e.key === "ArrowRight") handleNextImage();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen, activeImage, allImages]);
 
   // Reviews state
   const [reviewsList, setReviewsList] = useState<any[]>(initialReviews);
@@ -325,6 +408,7 @@ export default function ProductDetailClient({
           display: flex;
           gap: 20px;
           align-items: flex-start;
+          position: relative;
         }
 
         /* Thumbnails Strip (Left on Desktop) */
@@ -380,6 +464,7 @@ export default function ProductDetailClient({
           display: flex;
           align-items: center;
           justify-content: center;
+          cursor: crosshair;
         }
 
         .pd-showcase-img {
@@ -388,7 +473,264 @@ export default function ProductDetailClient({
           max-height: 640px;
           object-fit: cover;
           display: block;
-          transition: transform 0.3s ease;
+          transition: transform 0.15s ease-out;
+          user-select: none;
+        }
+
+        /* Amazon & Flipkart Zoom Lens */
+        .pd-zoom-lens {
+          position: absolute;
+          width: 160px;
+          height: 160px;
+          border: 1.5px solid rgba(168, 61, 34, 0.75);
+          background: rgba(255, 255, 255, 0.38);
+          box-shadow: 0 0 16px rgba(0, 0, 0, 0.22), inset 0 0 8px rgba(192, 138, 40, 0.2);
+          pointer-events: none;
+          border-radius: 6px;
+          z-index: 4;
+        }
+
+        /* Subtle Zoom Help Pill */
+        .pd-zoom-pill {
+          position: absolute;
+          bottom: 14px;
+          left: 14px;
+          background: rgba(28, 22, 18, 0.78);
+          backdrop-filter: blur(6px);
+          color: #ffffff;
+          padding: 6px 14px;
+          border-radius: 9999px;
+          font-size: 11.5px;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          pointer-events: none;
+          z-index: 4;
+          transition: opacity 0.25s ease;
+        }
+
+        .pd-showcase-container.is-zoomed .pd-zoom-pill {
+          opacity: 0;
+        }
+
+        /* Amazon / Flipkart Floating Zoom Window */
+        .pd-zoom-window {
+          position: absolute;
+          left: calc(100% + 48px);
+          top: 0;
+          width: 100%;
+          height: 100%;
+          min-width: 480px;
+          max-height: 640px;
+          background: #ffffff;
+          border: 1.5px solid #e2d2be;
+          border-radius: 16px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24), 0 4px 20px rgba(168, 61, 34, 0.1);
+          overflow: hidden;
+          z-index: 100;
+          pointer-events: none;
+          animation: pdZoomFadeIn 0.15s ease-out;
+        }
+
+        @keyframes pdZoomFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .pd-zoom-preview {
+          width: 100%;
+          height: 100%;
+          background-repeat: no-repeat;
+          transition: background-position 0.04s linear;
+        }
+
+        .pd-zoom-window-header {
+          position: absolute;
+          bottom: 12px;
+          right: 14px;
+          background: rgba(28, 22, 18, 0.82);
+          backdrop-filter: blur(4px);
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+          padding: 5px 12px;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        /* Fullscreen Lightbox Modal */
+        .pd-lightbox-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(14, 11, 9, 0.94);
+          backdrop-filter: blur(10px);
+          z-index: 999999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 20px 20px 20px;
+          animation: pdLbFade 0.2s ease-out;
+        }
+
+        @keyframes pdLbFade {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .pd-lightbox-header {
+          width: 100%;
+          max-width: 1200px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: #ffffff;
+          z-index: 10;
+        }
+
+        .pd-lightbox-title {
+          font-size: 15px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          color: #f7ede1;
+        }
+
+        .pd-lightbox-tools {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .pd-lb-btn {
+          background: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          color: #ffffff;
+          padding: 8px 14px;
+          border-radius: 9999px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .pd-lb-btn:hover {
+          background: #a83d22;
+          border-color: #a83d22;
+        }
+
+        .pd-lb-btn.icon-only {
+          width: 40px;
+          height: 40px;
+          padding: 0;
+          justify-content: center;
+          border-radius: 50%;
+        }
+
+        .pd-lightbox-main {
+          position: relative;
+          width: 100%;
+          max-width: 1100px;
+          height: calc(100vh - 210px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .pd-lightbox-img-wrap {
+          max-width: 100%;
+          max-height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.25s ease-out;
+        }
+
+        .pd-lightbox-img {
+          max-width: 90vw;
+          max-height: calc(100vh - 220px);
+          object-fit: contain;
+          border-radius: 12px;
+          box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+          user-select: none;
+        }
+
+        .pd-lightbox-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          color: #ffffff;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          z-index: 10;
+        }
+
+        .pd-lightbox-arrow:hover {
+          background: #a83d22;
+          border-color: #a83d22;
+          transform: translateY(-50%) scale(1.08);
+        }
+
+        .pd-lightbox-arrow.prev {
+          left: 10px;
+        }
+
+        .pd-lightbox-arrow.next {
+          right: 10px;
+        }
+
+        .pd-lightbox-footer {
+          display: flex;
+          gap: 10px;
+          padding: 8px 16px;
+          max-width: 90vw;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+
+        .pd-lightbox-thumb {
+          width: 60px;
+          height: 75px;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+          border: 2px solid transparent;
+          opacity: 0.6;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+
+        .pd-lightbox-thumb.active {
+          border-color: #c08a28;
+          opacity: 1;
+          transform: scale(1.08);
+        }
+
+        .pd-lightbox-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .pd-showcase-actions {
@@ -1342,6 +1684,19 @@ export default function ProductDetailClient({
            RESPONSIVE BREAKPOINTS (Tablet, Mobile, Small)
            ════════════════════════════════════════════════════ */
 
+        /* Responsive Zoom Adjustments */
+        @media (max-width: 1080px) {
+          .pd-zoom-window {
+            display: none !important;
+          }
+          .pd-zoom-lens {
+            display: none !important;
+          }
+          .pd-showcase-container.is-zoomed .pd-showcase-img {
+            transform: scale(2.2);
+          }
+        }
+
         /* 1. Tablet & Small Laptop (max-width: 992px) */
         @media (max-width: 992px) {
           .product-detail-wrapper {
@@ -1701,13 +2056,56 @@ export default function ProductDetailClient({
               </div>
 
               {/* Showcase Main Image */}
-              <div className="pd-showcase-container">
+              <div
+                className={`pd-showcase-container ${isZooming ? "is-zoomed" : ""}`}
+                onMouseEnter={() => setIsZooming(true)}
+                onMouseLeave={() => setIsZooming(false)}
+                onMouseMove={handleShowcaseMouseMove}
+                onClick={() => setIsLightboxOpen(true)}
+              >
                 <img
                   src={activeImage}
                   alt={product.product_name}
                   className="pd-showcase-img"
+                  style={
+                    isZooming
+                      ? {
+                          transformOrigin: `${zoomPos.cursorX}% ${zoomPos.cursorY}%`,
+                        }
+                      : undefined
+                  }
                 />
-                <div className="pd-showcase-actions">
+
+                {/* Amazon / Flipkart Zoom Lens */}
+                {isZooming && (
+                  <div
+                    className="pd-zoom-lens"
+                    style={{
+                      left: `${zoomPos.lensX}px`,
+                      top: `${zoomPos.lensY}px`,
+                    }}
+                  />
+                )}
+
+                {/* Subtle zoom hint pill */}
+                <div className="pd-zoom-pill">
+                  <ZoomIn size={13} />
+                  <span>Hover to zoom &bull; Click for full screen</span>
+                </div>
+
+                <div
+                  className="pd-showcase-actions"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    className="pd-action-icon-btn"
+                    aria-label="View Fullscreen"
+                    title="View Fullscreen"
+                    onClick={() => setIsLightboxOpen(true)}
+                  >
+                    <Maximize2 size={18} />
+                  </button>
                   <button
                     type="button"
                     className={`pd-action-icon-btn ${liked ? "active" : ""}`}
@@ -1739,6 +2137,24 @@ export default function ProductDetailClient({
                   </button>
                 </div>
               </div>
+
+              {/* Amazon / Flipkart Floating Zoom Window */}
+              {isZooming && (
+                <div className="pd-zoom-window">
+                  <div
+                    className="pd-zoom-preview"
+                    style={{
+                      backgroundImage: `url(${activeImage})`,
+                      backgroundPosition: `${zoomPos.xPercent}% ${zoomPos.yPercent}%`,
+                      backgroundSize: "280% auto",
+                    }}
+                  />
+                  <div className="pd-zoom-window-header">
+                    <Sparkles size={12} color="#c08a28" />
+                    <span>High-Resolution Fabric Detail</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Product Details (Right) */}
@@ -2404,6 +2820,127 @@ export default function ProductDetailClient({
           <span className="review-text">Reviews</span>
         </button>
       </div>
+
+      {/* Fullscreen Lightbox Modal */}
+      {isLightboxOpen && (
+        <div
+          className="pd-lightbox-overlay"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar */}
+          <div
+            className="pd-lightbox-header"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pd-lightbox-title">
+              {product.product_name} &bull; Image {allImages.indexOf(activeImage) + 1} of {allImages.length}
+            </div>
+
+            <div className="pd-lightbox-tools">
+              <button
+                type="button"
+                className="pd-lb-btn"
+                onClick={() => setLightboxScale((prev) => Math.min(prev + 0.4, 3.0))}
+                title="Zoom In"
+              >
+                <ZoomIn size={15} /> Zoom In
+              </button>
+              <button
+                type="button"
+                className="pd-lb-btn"
+                onClick={() => setLightboxScale((prev) => Math.max(prev - 0.4, 1))}
+                title="Zoom Out"
+              >
+                <ZoomOut size={15} /> Zoom Out
+              </button>
+              {lightboxScale > 1 && (
+                <button
+                  type="button"
+                  className="pd-lb-btn"
+                  onClick={() => setLightboxScale(1)}
+                  title="Reset Zoom"
+                >
+                  <RotateCcw size={15} /> Reset
+                </button>
+              )}
+              <button
+                type="button"
+                className="pd-lb-btn icon-only"
+                onClick={() => setIsLightboxOpen(false)}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Photo with Navigation Arrows */}
+          <div
+            className="pd-lightbox-main"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                className="pd-lightbox-arrow prev"
+                onClick={handlePrevImage}
+                aria-label="Previous Image"
+              >
+                <ChevronLeft size={28} />
+              </button>
+            )}
+
+            <div
+              className="pd-lightbox-img-wrap"
+              style={{
+                transform: `scale(${lightboxScale})`,
+                cursor: lightboxScale > 1 ? "grab" : "default",
+              }}
+            >
+              <img
+                src={activeImage}
+                alt={product.product_name}
+                className="pd-lightbox-img"
+              />
+            </div>
+
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                className="pd-lightbox-arrow next"
+                onClick={handleNextImage}
+                aria-label="Next Image"
+              >
+                <ChevronRight size={28} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          {allImages.length > 1 && (
+            <div
+              className="pd-lightbox-footer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {allImages.map((imgSrc, idx) => (
+                <div
+                  key={idx}
+                  className={`pd-lightbox-thumb ${activeImage === imgSrc ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveImage(imgSrc);
+                    setLightboxScale(1);
+                  }}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={`Thumbnail ${idx + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
