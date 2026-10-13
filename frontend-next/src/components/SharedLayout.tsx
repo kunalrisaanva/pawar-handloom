@@ -8,7 +8,6 @@ import {
   X,
   ChevronDown,
   ChevronRight,
-  Leaf,
   Star,
   CheckCircle,
   MapPin,
@@ -419,16 +418,6 @@ export default function SharedLayout({
                 </ul>
               </li>
               <li>
-                <a href="#" style={{ color: "#ac4024" }}>
-                  <Leaf size={14} style={{ marginRight: 4 }} /> Offers
-                </a>
-              </li>
-              <li>
-                <a href="#" style={{ color: "#ac4024" }}>
-                  <Star size={14} style={{ marginRight: 4 }} /> Sale
-                </a>
-              </li>
-              <li>
                 <a href="/about">About</a>
               </li>
             </ul>
@@ -525,16 +514,6 @@ export default function SharedLayout({
                     ))}
                   </ul>
                 )}
-              </li>
-              <li>
-                <a href="#" className="mobile-nav-highlight">
-                  Offers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="mobile-nav-highlight">
-                  Sale
-                </a>
               </li>
               <li>
                 <a href="/about">About Us</a>
