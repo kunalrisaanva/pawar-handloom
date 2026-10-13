@@ -102,44 +102,76 @@ const NEW_ARRIVALS = [
 ];
 
 const SAREE_CATEGORIES = [
-  { name: "Maheshwari Sarees", img: "/shop-category-1.png", id: 10, href: "/detail/10" },
-  { name: "Chanderi Sarees", img: "/shop-category-2.png", id: 9, href: "/detail/9" },
-  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", id: 4, href: "/detail/4" },
-  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", id: 1, href: "/detail/1" },
+  { name: "Maheshwari Sarees", img: "/shop-category-1.png", id: 1, href: "/shop/2/1" },
+  { name: "Chanderi Sarees", img: "/shop-category-2.png", id: 2, href: "/shop/2/2" },
+  { name: "Handblock Printed Sarees", img: "/shop-category-3.png", id: 3, href: "/shop/2/3" },
+  { name: "Pure Cotton Sarees", img: "/shop-category-4.png", id: 5, href: "/shop/2/5" },
+];
+
+const DRESS_MATERIAL_CATEGORIES = [
+  {
+    id: 6,
+    name: "Maheshwari Dress Material",
+    img: "https://pawarhandloom.com/public/uploads/products/cover/1756383012_433d62525d79e078b558.jpeg",
+    href: "/shop/3/6",
+  },
+  {
+    id: 7,
+    name: "Chanderi Dress Material",
+    img: "https://pawarhandloom.com/public/uploads/products/cover/1756383095_26fdba15a2226f5bb2ad.jpeg",
+    href: "/shop/3/7",
+  },
+  {
+    id: 8,
+    name: "HandBlock Dress Material",
+    img: "https://pawarhandloom.com/public/uploads/products/cover/1756383177_1e6bdc13ee56da5dfa1e.jpeg",
+    href: "/shop/3/8",
+  },
+  {
+    id: 9,
+    name: "Pure Cotton Dress Material",
+    img: "https://pawarhandloom.com/public/uploads/products/cover/1756383264_e91a36f61bfd24b09aaf.jpeg",
+    href: "/shop/3/9",
+  },
 ];
 
 const DRESS_MATERIALS = [
   {
-    id: 1,
+    id: 25,
     name: "Maheshwari Bagh Suits",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383012_433d62525d79e078b558.jpeg",
-    originalPrice: "2,500.00",
-    salePrice: "2,250.00",
+    originalPrice: "7,000.00",
+    salePrice: "6,300.00",
     discount: "10% OFF",
+    badge: "NEW",
+    readyToShip: true,
   },
   {
-    id: 2,
-    name: "Dress Material",
+    id: 35,
+    name: "Pure Handloom Dress Material",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383095_26fdba15a2226f5bb2ad.jpeg",
     originalPrice: "2,500.00",
     salePrice: "2,250.00",
     discount: "10% OFF",
+    readyToShip: true,
   },
   {
-    id: 3,
-    name: "Dress Material",
+    id: 38,
+    name: "Maheshwari Tissue Top and Dupatta Set",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383177_1e6bdc13ee56da5dfa1e.jpeg",
-    originalPrice: "2,500.00",
-    salePrice: "2,250.00",
+    originalPrice: "5,000.00",
+    salePrice: "4,500.00",
     discount: "10% OFF",
+    readyToShip: true,
   },
   {
-    id: 4,
-    name: "Dress Material",
+    id: 39,
+    name: "Maheshwari Tissue Top and Dupatta Set",
     img: "https://pawarhandloom.com/public/uploads/products/cover/1756383264_e91a36f61bfd24b09aaf.jpeg",
-    originalPrice: "2,500.00",
-    salePrice: "2,250.00",
+    originalPrice: "5,000.00",
+    salePrice: "4,500.00",
     discount: "10% OFF",
+    readyToShip: true,
   },
 ];
 
@@ -955,7 +987,7 @@ function ShopByCategoryTabs() {
   }, []);
 
   const currentData =
-    activeTab === "Sarees" ? SAREE_CATEGORIES : DRESS_MATERIALS;
+    activeTab === "Sarees" ? SAREE_CATEGORIES : DRESS_MATERIAL_CATEGORIES;
 
   return (
     <section id="dress-materials" className="shop-category-section">
@@ -983,7 +1015,7 @@ function ShopByCategoryTabs() {
         {currentData.map((cat, idx) => {
           const catHref =
             (cat as any).href ||
-            ((cat as any).id ? `/detail/${(cat as any).id}` : "/detail/10");
+            ((cat as any).id ? `/shop/2/${(cat as any).id}` : "/shop");
           return (
             <div
               key={cat.name + idx}

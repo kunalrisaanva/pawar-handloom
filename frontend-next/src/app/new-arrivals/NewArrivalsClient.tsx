@@ -42,6 +42,9 @@ interface NewArrivalsClientProps {
     id?: number;
     category_name: string;
     category_description?: string;
+    parent_category?: string;
+    parent_href?: string;
+    badge?: string;
   };
 }
 
@@ -1000,19 +1003,31 @@ export default function NewArrivalsClient({
                 <ArrowLeft size={14} /> Home
               </a>
               <span className="na-breadcrumb-sep">/</span>
-              <span className="na-breadcrumb-active">New Arrivals</span>
+              {categoryInfo.parent_category && (
+                <>
+                  <a href={categoryInfo.parent_href || "/shop"}>
+                    {categoryInfo.parent_category}
+                  </a>
+                  <span className="na-breadcrumb-sep">/</span>
+                </>
+              )}
+              <span className="na-breadcrumb-active">
+                {categoryInfo.category_name || "New Arrivals"}
+              </span>
             </div>
 
             {/* Title & Badge */}
             <div className="na-hero-title-row">
               <div>
                 <span className="na-hero-badge">
-                  <Sparkles size={13} /> Fresh Looms 2026
+                  <Sparkles size={13} /> {categoryInfo.badge || "Handcrafted Collection"}
                 </span>
-                <h1 className="na-hero-title">New Arrivals</h1>
+                <h1 className="na-hero-title">
+                  {categoryInfo.category_name || "New Arrivals"}
+                </h1>
                 <p className="na-hero-subtitle">
                   {categoryInfo.category_description ||
-                    "Explore our newest handwoven sarees, dupattas, and suits freshly crafted by master artisans in Maheshwar."}
+                    "Explore our handcrafted collection of authentic handloom sarees and suits, weaved with royal heritage by master artisans in Maheshwar."}
                 </p>
               </div>
             </div>
@@ -1050,7 +1065,7 @@ export default function NewArrivalsClient({
                 <input
                   type="text"
                   className="na-search-input"
-                  placeholder="Search New Arrivals (e.g. Silk, Zari, Tissue)..."
+                  placeholder={`Search ${categoryInfo.category_name || "collection"} (e.g. Silk, Zari, Tissue)...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -1109,7 +1124,7 @@ export default function NewArrivalsClient({
                 }`}
                 onClick={() => setSelectedCategory("all")}
               >
-                All New Arrivals ({initialProducts.length})
+                All {categoryInfo.category_name || "Weaves"} ({initialProducts.length})
               </button>
               {categoryOptions.map((catName) => (
                 <button
@@ -1157,15 +1172,15 @@ export default function NewArrivalsClient({
               </div>
               <h3 className="na-empty-title">No Weaves Found</h3>
               <p className="na-empty-desc">
-                We couldn't find any new arrivals matching your search or filter
-                criteria. Try clearing your filters to explore our full collection.
+                We couldn't find any weaves in {categoryInfo.category_name || "this collection"} matching your search or filter
+                criteria. Try clearing your filters or explore our full collection.
               </p>
               <button
                 type="button"
                 className="na-empty-reset-btn"
                 onClick={clearFilters}
               >
-                View All New Arrivals
+                View All {categoryInfo.parent_category || categoryInfo.category_name || "Weaves"}
               </button>
             </div>
           ) : (
