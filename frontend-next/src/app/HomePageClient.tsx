@@ -1645,9 +1645,6 @@ export default function Index({
                 <ShoppingBag size={20} />
                 <span className="cart-badge">{cartCount}</span>
               </a>
-              <a href="#">
-                <Heart size={20} />
-              </a>
               <div className="user-dropdown">
                 <a href="/login">
                   <User size={20} />

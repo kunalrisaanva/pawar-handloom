@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Search,
   ShoppingBag,
-  Heart,
   User,
   Menu,
   X,
@@ -329,9 +328,6 @@ export default function SharedLayout({
               <a href="/cart" style={{ position: "relative" }}>
                 <ShoppingBag size={20} />
                 <span className="cart-badge">{cartCount}</span>
-              </a>
-              <a href="#">
-                <Heart size={20} />
               </a>
               <div className="user-dropdown">
                 <a href="/login">
