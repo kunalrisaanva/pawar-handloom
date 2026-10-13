@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowLeft,
   ShoppingBag,
@@ -84,28 +84,109 @@ export default function ProductDetailClient({
   const [activeTab, setActiveTab] = useState<string>("description");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Amazon & Flipkart style Image Zoom state
+  // Amazon & Flipkart style Image Zoom state & 60/120fps hardware-accelerated tracking
   const [isZooming, setIsZooming] = useState<boolean>(false);
-  const [zoomPos, setZoomPos] = useState({
-    lensX: 0,
-    lensY: 0,
-    xPercent: 0,
-    yPercent: 0,
-    cursorX: 50,
-    cursorY: 50,
-  });
+  const [zoomLevel, setZoomLevel] = useState<number>(2.5); // 1.6x to 4.5x dynamic smart zoom
+
+  const showcaseRef = useRef<HTMLDivElement | null>(null);
+  const showcaseImgRef = useRef<HTMLImageElement | null>(null);
+  const lensRef = useRef<HTMLDivElement | null>(null);
+  const zoomPreviewRef = useRef<HTMLDivElement | null>(null);
 
   // Fullscreen Lightbox Modal state
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [lightboxScale, setLightboxScale] = useState<number>(1);
 
+  // High-performance smooth LERP interpolation positions
+  const targetPosRef = useRef({ lensX: 0, lensY: 0, xPercent: 50, yPercent: 50 });
+  const currentPosRef = useRef({ lensX: 0, lensY: 0, xPercent: 50, yPercent: 50 });
+  const animFrameRef = useRef<number | null>(null);
+  const zoomLevelRef = useRef<number>(2.5);
+
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+  }, [zoomLevel]);
+
+  // Buttery-smooth requestAnimationFrame interpolation loop (zero layout reflows)
+  const updateZoomFrame = useCallback(() => {
+    const target = targetPosRef.current;
+    const current = currentPosRef.current;
+
+    // LERP (Linear Interpolation) with 0.35 factor for fluid response without lag
+    const factor = 0.35;
+    current.lensX += (target.lensX - current.lensX) * factor;
+    current.lensY += (target.lensY - current.lensY) * factor;
+    current.xPercent += (target.xPercent - current.xPercent) * factor;
+    current.yPercent += (target.yPercent - current.yPercent) * factor;
+
+    // Direct GPU composite transform for lens
+    if (lensRef.current) {
+      lensRef.current.style.transform = `translate3d(${current.lensX.toFixed(1)}px, ${current.lensY.toFixed(1)}px, 0)`;
+    }
+
+    // Direct background position update for preview window
+    if (zoomPreviewRef.current) {
+      zoomPreviewRef.current.style.backgroundPosition = `${current.xPercent.toFixed(2)}% ${current.yPercent.toFixed(2)}%`;
+      zoomPreviewRef.current.style.backgroundSize = `${(zoomLevelRef.current * 100).toFixed(0)}% auto`;
+    }
+
+    // Inner zoom fallback on mobile/tablet screens <= 1080px
+    if (showcaseImgRef.current && window.innerWidth <= 1080) {
+      showcaseImgRef.current.style.transformOrigin = `${current.xPercent.toFixed(1)}% ${current.yPercent.toFixed(1)}%`;
+    }
+
+    animFrameRef.current = requestAnimationFrame(updateZoomFrame);
+  }, []);
+
+  const handleShowcaseMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsZooming(true);
+    const container = showcaseRef.current;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const currentZoom = zoomLevelRef.current;
+      const lensW = Math.max(90, Math.min(220, Math.round(160 / (currentZoom / 2.5))));
+      const lensH = lensW;
+      const maxLensX = Math.max(0, rect.width - lensW);
+      const maxLensY = Math.max(0, rect.height - lensH);
+      const lensX = Math.max(0, Math.min(maxLensX, x - lensW / 2));
+      const lensY = Math.max(0, Math.min(maxLensY, y - lensH / 2));
+      const xPercent = maxLensX > 0 ? (lensX / maxLensX) * 100 : 50;
+      const yPercent = maxLensY > 0 ? (lensY / maxLensY) * 100 : 50;
+
+      targetPosRef.current = { lensX, lensY, xPercent, yPercent };
+      currentPosRef.current = { lensX, lensY, xPercent, yPercent };
+
+      if (lensRef.current) {
+        lensRef.current.style.width = `${lensW}px`;
+        lensRef.current.style.height = `${lensH}px`;
+        lensRef.current.style.transform = `translate3d(${lensX.toFixed(1)}px, ${lensY.toFixed(1)}px, 0)`;
+      }
+    }
+
+    if (!animFrameRef.current) {
+      animFrameRef.current = requestAnimationFrame(updateZoomFrame);
+    }
+  };
+
   const handleShowcaseMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    const container = showcaseRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const lensW = 160;
-    const lensH = 160;
+    // Smart dynamic lens sizing based on magnification
+    const currentZoom = zoomLevelRef.current;
+    const lensW = Math.max(90, Math.min(220, Math.round(160 / (currentZoom / 2.5))));
+    const lensH = lensW;
+
+    if (lensRef.current) {
+      lensRef.current.style.width = `${lensW}px`;
+      lensRef.current.style.height = `${lensH}px`;
+    }
 
     let lensX = x - lensW / 2;
     let lensY = y - lensH / 2;
@@ -113,26 +194,50 @@ export default function ProductDetailClient({
     const maxLensX = Math.max(0, rect.width - lensW);
     const maxLensY = Math.max(0, rect.height - lensH);
 
-    if (lensX < 0) lensX = 0;
-    if (lensY < 0) lensY = 0;
-    if (lensX > maxLensX) lensX = maxLensX;
-    if (lensY > maxLensY) lensY = maxLensY;
+    lensX = Math.max(0, Math.min(maxLensX, lensX));
+    lensY = Math.max(0, Math.min(maxLensY, lensY));
 
-    const xPercent = maxLensX > 0 ? (lensX / maxLensX) * 100 : 0;
-    const yPercent = maxLensY > 0 ? (lensY / maxLensY) * 100 : 0;
+    const xPercent = maxLensX > 0 ? (lensX / maxLensX) * 100 : (x / rect.width) * 100;
+    const yPercent = maxLensY > 0 ? (lensY / maxLensY) * 100 : (y / rect.height) * 100;
 
-    const cursorX = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    const cursorY = Math.max(0, Math.min(100, (y / rect.height) * 100));
-
-    setZoomPos({
+    targetPosRef.current = {
       lensX,
       lensY,
-      xPercent,
-      yPercent,
-      cursorX,
-      cursorY,
-    });
+      xPercent: Math.max(0, Math.min(100, xPercent)),
+      yPercent: Math.max(0, Math.min(100, yPercent)),
+    };
   };
+
+  const handleShowcaseMouseLeave = () => {
+    setIsZooming(false);
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+  };
+
+  // Smart non-passive wheel zoom scaling
+  useEffect(() => {
+    const el = showcaseRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.2 : -0.2;
+      setZoomLevel((prev) => {
+        const next = Math.max(1.6, Math.min(4.5, prev + delta));
+        return Number(next.toFixed(1));
+      });
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, []);
 
   const handlePrevImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -477,17 +582,55 @@ export default function ProductDetailClient({
           user-select: none;
         }
 
-        /* Amazon & Flipkart Zoom Lens */
+        /* Amazon & Flipkart Optical Viewfinder Lens */
         .pd-zoom-lens {
           position: absolute;
+          top: 0;
+          left: 0;
           width: 160px;
           height: 160px;
-          border: 1.5px solid rgba(168, 61, 34, 0.75);
+          border: 1.5px solid rgba(168, 61, 34, 0.85);
           background: rgba(255, 255, 255, 0.38);
-          box-shadow: 0 0 16px rgba(0, 0, 0, 0.22), inset 0 0 8px rgba(192, 138, 40, 0.2);
+          backdrop-filter: blur(1.5px);
+          -webkit-backdrop-filter: blur(1.5px);
+          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18), inset 0 0 10px rgba(192, 138, 40, 0.15);
           pointer-events: none;
           border-radius: 6px;
-          z-index: 4;
+          z-index: 5;
+          will-change: transform;
+          transform: translate3d(0, 0, 0);
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
+        }
+
+        .pd-zoom-lens.pd-zoom-active {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        /* Optical Viewfinder Corner Reticle Brackets */
+        .pd-zoom-lens::before,
+        .pd-zoom-lens::after {
+          content: "";
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          pointer-events: none;
+        }
+        .pd-zoom-lens::before {
+          top: 4px;
+          left: 4px;
+          border-top: 2.5px solid #a83d22;
+          border-left: 2.5px solid #a83d22;
+          border-top-left-radius: 2px;
+        }
+        .pd-zoom-lens::after {
+          bottom: 4px;
+          right: 4px;
+          border-bottom: 2.5px solid #a83d22;
+          border-right: 2.5px solid #a83d22;
+          border-bottom-right-radius: 2px;
         }
 
         /* Subtle Zoom Help Pill */
@@ -497,6 +640,7 @@ export default function ProductDetailClient({
           left: 14px;
           background: rgba(28, 22, 18, 0.78);
           backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
           color: #ffffff;
           padding: 6px 14px;
           border-radius: 9999px;
@@ -514,58 +658,88 @@ export default function ProductDetailClient({
           opacity: 0;
         }
 
+        .pd-zoom-pill-mobile {
+          display: none;
+        }
+
         /* Amazon / Flipkart Floating Zoom Window */
         .pd-zoom-window {
           position: absolute;
-          left: calc(100% + 48px);
+          left: calc(100% + 28px);
           top: 0;
           width: 100%;
           height: 100%;
           min-width: 480px;
           max-height: 640px;
           background: #ffffff;
-          border: 1.5px solid #e2d2be;
+          border: 1.5px solid #dfcfbc;
           border-radius: 16px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24), 0 4px 20px rgba(168, 61, 34, 0.1);
+          box-shadow: 0 24px 60px -10px rgba(28, 22, 18, 0.28), 0 6px 20px rgba(168, 61, 34, 0.08);
           overflow: hidden;
           z-index: 100;
           pointer-events: none;
-          animation: pdZoomFadeIn 0.15s ease-out;
+          opacity: 0;
+          visibility: hidden;
+          transform: scale(0.97) translateX(-6px);
+          transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s ease;
         }
 
-        @keyframes pdZoomFadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+        .pd-zoom-window.pd-zoom-active {
+          opacity: 1;
+          visibility: visible;
+          transform: scale(1) translateX(0);
         }
 
         .pd-zoom-preview {
           width: 100%;
           height: 100%;
           background-repeat: no-repeat;
-          transition: background-position 0.04s linear;
+          will-change: background-position, background-size;
+          transform: translateZ(0);
         }
 
         .pd-zoom-window-header {
           position: absolute;
-          bottom: 12px;
-          right: 14px;
-          background: rgba(28, 22, 18, 0.82);
-          backdrop-filter: blur(4px);
+          top: 14px;
+          left: 14px;
+          background: rgba(28, 22, 18, 0.88);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           color: #ffffff;
-          font-size: 11px;
+          font-size: 11.5px;
           font-weight: 600;
-          letter-spacing: 0.5px;
-          padding: 5px 12px;
+          letter-spacing: 0.3px;
+          padding: 6px 14px;
           border-radius: 9999px;
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 7px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .pd-zoom-badge-scale {
+          color: #f7c948;
+          font-weight: 700;
+          font-feature-settings: "tnum";
+        }
+
+        .pd-zoom-window-footer {
+          position: absolute;
+          bottom: 14px;
+          right: 14px;
+          background: rgba(28, 22, 18, 0.82);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          color: #f7e7ce;
+          font-size: 11px;
+          font-weight: 500;
+          padding: 5px 12px;
+          border-radius: 9999px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
 
         /* Fullscreen Lightbox Modal */
@@ -1681,7 +1855,7 @@ export default function ProductDetailClient({
         }
 
         /* ════════════════════════════════════════════════════
-           RESPONSIVE BREAKPOINTS (Tablet, Mobile, Small)
+           RESPONSIVE BREAKPOINTS (Desktop, Tablet, Mobile)
            ════════════════════════════════════════════════════ */
 
         /* Responsive Zoom Adjustments */
@@ -1697,15 +1871,19 @@ export default function ProductDetailClient({
           }
         }
 
-        /* 1. Tablet & Small Laptop (max-width: 992px) */
+        /* 1. Tablet Landscape & Small Laptop (max-width: 992px) */
         @media (max-width: 992px) {
+          /* ALWAYS hide sticky reviews button on tablet & mobile so it never covers product images */
+          .sticky-review-pawar {
+            display: none !important;
+          }
           .product-detail-wrapper {
-            padding: 24px 16px 85px;
+            padding: 20px 14px 90px;
           }
           .pd-main-grid {
             grid-template-columns: 1fr;
-            gap: 32px;
-            padding: 28px 24px;
+            gap: 28px;
+            padding: 24px 20px;
           }
           .pd-related-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -1713,231 +1891,272 @@ export default function ProductDetailClient({
           }
         }
 
-        /* 2. Tablet Portrait & Mobile (max-width: 768px) */
+        /* 2. Tablet Portrait & Standard Mobile (max-width: 768px) */
         @media (max-width: 768px) {
+          .sticky-review-pawar {
+            display: none !important;
+          }
+
           .product-detail-wrapper {
-            padding: 16px 12px 95px;
+            padding: 12px 10px 110px;
           }
+
           .pd-breadcrumb {
-            font-size: 13px;
-            margin-bottom: 16px;
-            gap: 6px;
+            font-size: 12.5px;
+            margin-bottom: 12px;
+            gap: 5px;
           }
+
           .pd-breadcrumb-current {
-            max-width: 180px;
+            max-width: 160px;
           }
+
+          .pd-main-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 14px 12px;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(80, 50, 30, 0.04);
+            border: 1px solid #ede3c9;
+            background: #ffffff;
+          }
+
           .pd-gallery-container {
             flex-direction: column-reverse;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
           }
+
+          .pd-showcase-container {
+            min-height: auto;
+            max-height: 440px;
+            width: 100%;
+            border-radius: 12px;
+            aspect-ratio: 4/5;
+            background: #fbf9f5;
+            border: none;
+            overflow: hidden;
+          }
+
+          .pd-showcase-img {
+            max-height: 440px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .pd-showcase-actions {
+            top: 10px;
+            right: 10px;
+            gap: 8px;
+            z-index: 6;
+          }
+
+          .pd-action-icon-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(220, 205, 185, 0.7);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .pd-zoom-pill {
+            bottom: 10px;
+            left: 10px;
+            padding: 5px 11px;
+            font-size: 11px;
+          }
+
+          .pd-zoom-pill-desktop {
+            display: none !important;
+          }
+
+          .pd-zoom-pill-mobile {
+            display: inline !important;
+          }
+
           .pd-thumbnails-strip {
             flex-direction: row;
             width: 100%;
             max-height: none;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 4px;
-            gap: 10px;
+            padding: 2px 2px 6px 2px;
+            gap: 8px;
             scrollbar-width: none;
           }
+
           .pd-thumbnails-strip::-webkit-scrollbar {
             display: none;
           }
+
           .pd-thumbnail-item {
-            width: 70px;
-            height: 90px;
+            width: 64px;
+            height: 82px;
             flex-shrink: 0;
             border-radius: 8px;
+            border: 1.5px solid #ede3c9;
           }
-          .pd-showcase-container {
-            min-height: auto;
-            max-height: 480px;
-            width: 100%;
-            border-radius: 12px;
-            aspect-ratio: 3/4;
+
+          .pd-thumbnail-item.active {
+            border-color: #a83d22;
+            box-shadow: 0 0 0 2px rgba(168, 61, 34, 0.25);
           }
-          .pd-showcase-img {
-            max-height: 480px;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          .pd-action-icon-btn {
-            width: 40px;
-            height: 40px;
-          }
+
           .pd-product-title {
-            font-size: 24px;
-            margin-bottom: 12px;
+            font-size: 22px;
+            margin-bottom: 10px;
             line-height: 1.3;
           }
+
           .pd-price-row {
             gap: 8px;
-            margin-bottom: 16px;
-            padding-bottom: 14px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
           }
-          .pd-original-price {
-            font-size: 16px;
-          }
-          .pd-final-price {
-            font-size: 24px;
-          }
-          .pd-per-piece {
-            font-size: 14px;
-          }
-          .pd-discount-badge {
-            font-size: 12px;
-            padding: 3px 8px;
-          }
-          .pd-short-desc {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 18px;
-          }
-          .pd-tabs-container {
-            padding: 22px 18px;
-            border-radius: 14px;
-            margin-top: 32px;
-          }
-          .pd-tabs-nav {
-            gap: 12px;
-            margin-bottom: 24px;
-            justify-content: center;
-          }
-          .pd-tab-btn {
-            font-size: 14px;
-            padding: 8px 20px;
-          }
-          .pd-additional-grid {
-            grid-template-columns: 1fr;
-          }
-          .pd-tab-content {
-            font-size: 14px;
-            line-height: 1.65;
-          }
-          .pd-related-section {
-            margin-top: 40px;
-          }
-          .pd-related-title {
-            font-size: 24px;
-            margin-bottom: 22px;
-          }
-        }
 
-        /* 3. Standard Mobile (max-width: 640px) */
-        @media (max-width: 640px) {
-          .pd-main-grid {
-            padding: 18px 14px;
-            gap: 20px;
-            border-radius: 14px;
+          .pd-original-price {
+            font-size: 15px;
           }
+
+          .pd-final-price {
+            font-size: 22px;
+          }
+
+          .pd-per-piece {
+            font-size: 13px;
+          }
+
+          .pd-discount-badge {
+            font-size: 11.5px;
+            padding: 2px 7px;
+          }
+
+          .pd-short-desc {
+            font-size: 13.5px;
+            line-height: 1.55;
+            margin-bottom: 16px;
+          }
+
           .pd-purchase-row {
             display: flex;
             flex-direction: row;
             gap: 10px;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
           }
+
           .pd-qty-selector {
-            height: 46px;
-            min-width: 110px;
+            height: 44px;
+            min-width: 100px;
             flex-shrink: 0;
           }
+
           .pd-qty-btn {
-            width: 36px;
-            font-size: 16px;
-          }
-          .pd-qty-value {
-            width: 38px;
+            width: 32px;
             font-size: 15px;
           }
+
+          .pd-qty-value {
+            width: 36px;
+            font-size: 14px;
+          }
+
           .pd-add-to-cart-btn {
-            height: 46px;
+            height: 44px;
             min-width: 0;
             flex: 1;
-            font-size: 13.5px;
+            font-size: 13px;
             padding: 0 10px;
             gap: 6px;
-            letter-spacing: 0.02em;
           }
+
           .pd-color-section {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
           }
+
           .pd-color-chips {
-            gap: 8px;
-          }
-          .pd-color-pill {
-            padding: 6px 12px 6px 8px;
-            font-size: 13px;
             gap: 7px;
           }
+
+          .pd-color-pill {
+            padding: 5px 11px 5px 7px;
+            font-size: 12.5px;
+            gap: 6px;
+          }
+
           .pd-swatch-dot {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 15px;
           }
+
           .pd-specifications-container {
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
           }
+
           .pd-spec-row {
-            font-size: 13px;
-            padding: 9px 0;
+            font-size: 12.5px;
+            padding: 8px 0;
             gap: 8px;
           }
+
           .pd-spec-label {
-            min-width: 110px;
-            font-size: 13px;
+            min-width: 100px;
+            font-size: 12.5px;
           }
+
           .pd-spec-value {
-            font-size: 13px;
+            font-size: 12.5px;
             max-width: 65%;
           }
+
           .pd-guarantees-row {
             grid-template-columns: 1fr;
             gap: 8px;
-            padding-top: 12px;
+            padding-top: 10px;
           }
+
           .pd-guarantee-item {
-            font-size: 12.5px;
+            font-size: 12px;
           }
-          .pd-related-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          .pd-related-card {
-            border-radius: 10px;
-          }
-          .pd-related-body {
-            padding: 12px 8px;
-          }
-          .pd-related-name {
-            font-size: 13px;
-            height: 34px;
-            line-height: 1.35;
-            margin-bottom: 4px;
-          }
-          .pd-related-price {
-            font-size: 14px;
-          }
-          .pd-floating-call {
-            bottom: 16px;
-            left: 14px;
-            padding: 8px 14px;
-            font-size: 12.5px;
-            gap: 6px;
-          }
+
+          /* Floating Contact Buttons: Cleanly Stacked on Bottom Right to NEVER overlap content */
           .pd-floating-whatsapp {
-            bottom: 16px;
-            right: 14px;
+            bottom: 20px;
+            right: 16px;
             width: 48px;
             height: 48px;
+            z-index: 999;
+            box-shadow: 0 4px 18px rgba(37, 211, 102, 0.45);
           }
-        }
 
-        /* 3. Standard Mobile (max-width: 640px) tabs styling */
-        @media (max-width: 640px) {
+          .pd-floating-call {
+            bottom: 76px;
+            right: 18px;
+            left: auto;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 999;
+            box-shadow: 0 4px 16px rgba(16, 156, 176, 0.4);
+          }
+
+          .pd-floating-call .pd-call-text {
+            display: none !important;
+          }
+
+          .pd-tabs-container {
+            padding: 18px 14px;
+            border-radius: 14px;
+            margin-top: 24px;
+          }
+
           .pd-tabs-nav {
             justify-content: flex-start;
             overflow-x: auto;
@@ -1947,66 +2166,138 @@ export default function ProductDetailClient({
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
           }
+
           .pd-tabs-nav::-webkit-scrollbar {
             display: none;
           }
+
           .pd-tab-btn {
-            font-size: 13.5px;
-            padding: 8px 18px;
+            font-size: 13px;
+            padding: 7px 16px;
             flex-shrink: 0;
           }
+
           .pd-desc-table td {
-            padding: 12px 14px;
-            font-size: 13.5px;
+            padding: 10px 12px;
+            font-size: 13px;
           }
+
           .pd-desc-td-label {
             width: 45%;
           }
+
           .pd-form-row {
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 10px;
           }
+
           .pd-reviews-header-bar {
             flex-direction: column;
             align-items: flex-start;
           }
-        }
 
-        /* 4. Small Phones (max-width: 480px) */
-        @media (max-width: 480px) {
-          .sticky-review-pawar {
-            display: none;
+          .pd-additional-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .pd-related-section {
+            margin-top: 36px;
+          }
+
+          .pd-related-title {
+            font-size: 22px;
+            margin-bottom: 18px;
+          }
+
+          .pd-related-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+
+          .pd-related-card {
+            border-radius: 10px;
+          }
+
+          .pd-related-body {
+            padding: 10px 8px;
+          }
+
+          .pd-related-name {
+            font-size: 12.5px;
+            height: 32px;
+            line-height: 1.35;
+            margin-bottom: 4px;
+          }
+
+          .pd-related-price {
+            font-size: 13.5px;
           }
         }
 
-        /* 5. Extra Small Phones (max-width: 380px) */
+        /* 3. Small Phones (max-width: 480px) */
+        @media (max-width: 480px) {
+          .product-detail-wrapper {
+            padding: 10px 8px 110px;
+          }
+
+          .pd-main-grid {
+            padding: 10px 8px;
+            border-radius: 14px;
+          }
+
+          .pd-showcase-container {
+            max-height: 400px;
+          }
+
+          .pd-showcase-img {
+            max-height: 400px;
+          }
+
+          .pd-thumbnail-item {
+            width: 58px;
+            height: 74px;
+          }
+
+          .pd-product-title {
+            font-size: 20px;
+          }
+
+          .pd-final-price {
+            font-size: 20px;
+          }
+        }
+
+        /* 4. Extra Small Phones (max-width: 380px) */
         @media (max-width: 380px) {
           .pd-breadcrumb-current {
-            max-width: 120px;
+            max-width: 110px;
           }
+
           .pd-thumbnail-item {
-            width: 60px;
-            height: 76px;
+            width: 54px;
+            height: 70px;
           }
+
           .pd-product-title {
-            font-size: 21px;
+            font-size: 18px;
           }
+
           .pd-final-price {
-            font-size: 21px;
+            font-size: 18px;
           }
-          .pd-floating-call .pd-call-text {
-            display: none;
-          }
-          .pd-floating-call {
-            width: 44px;
-            height: 44px;
-            padding: 0;
-            justify-content: center;
-            border-radius: 50%;
-          }
+
           .pd-floating-whatsapp {
+            bottom: 16px;
+            right: 12px;
             width: 44px;
             height: 44px;
+          }
+
+          .pd-floating-call {
+            bottom: 68px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
           }
         }
       `}</style>
@@ -2057,40 +2348,31 @@ export default function ProductDetailClient({
 
               {/* Showcase Main Image */}
               <div
+                ref={showcaseRef}
                 className={`pd-showcase-container ${isZooming ? "is-zoomed" : ""}`}
-                onMouseEnter={() => setIsZooming(true)}
-                onMouseLeave={() => setIsZooming(false)}
+                onMouseEnter={handleShowcaseMouseEnter}
+                onMouseLeave={handleShowcaseMouseLeave}
                 onMouseMove={handleShowcaseMouseMove}
                 onClick={() => setIsLightboxOpen(true)}
               >
                 <img
+                  ref={showcaseImgRef}
                   src={activeImage}
                   alt={product.product_name}
                   className="pd-showcase-img"
-                  style={
-                    isZooming
-                      ? {
-                          transformOrigin: `${zoomPos.cursorX}% ${zoomPos.cursorY}%`,
-                        }
-                      : undefined
-                  }
                 />
 
-                {/* Amazon / Flipkart Zoom Lens */}
-                {isZooming && (
-                  <div
-                    className="pd-zoom-lens"
-                    style={{
-                      left: `${zoomPos.lensX}px`,
-                      top: `${zoomPos.lensY}px`,
-                    }}
-                  />
-                )}
+                {/* Amazon / Flipkart Precision Optical Viewfinder Lens */}
+                <div
+                  ref={lensRef}
+                  className={`pd-zoom-lens ${isZooming ? "pd-zoom-active" : ""}`}
+                />
 
                 {/* Subtle zoom hint pill */}
                 <div className="pd-zoom-pill">
                   <ZoomIn size={13} />
-                  <span>Hover to zoom &bull; Click for full screen</span>
+                  <span className="pd-zoom-pill-desktop">Hover to zoom &bull; Scroll to magnify &bull; Click fullscreen</span>
+                  <span className="pd-zoom-pill-mobile">Tap image for fullscreen view</span>
                 </div>
 
                 <div
@@ -2139,22 +2421,24 @@ export default function ProductDetailClient({
               </div>
 
               {/* Amazon / Flipkart Floating Zoom Window */}
-              {isZooming && (
-                <div className="pd-zoom-window">
-                  <div
-                    className="pd-zoom-preview"
-                    style={{
-                      backgroundImage: `url(${activeImage})`,
-                      backgroundPosition: `${zoomPos.xPercent}% ${zoomPos.yPercent}%`,
-                      backgroundSize: "280% auto",
-                    }}
-                  />
-                  <div className="pd-zoom-window-header">
-                    <Sparkles size={12} color="#c08a28" />
-                    <span>High-Resolution Fabric Detail</span>
-                  </div>
+              <div className={`pd-zoom-window ${isZooming ? "pd-zoom-active" : ""}`}>
+                <div
+                  ref={zoomPreviewRef}
+                  className="pd-zoom-preview"
+                  style={{
+                    backgroundImage: `url(${activeImage})`,
+                    backgroundSize: `${(zoomLevel * 100).toFixed(0)}% auto`,
+                  }}
+                />
+                <div className="pd-zoom-window-header">
+                  <Sparkles size={13} color="#f7c948" />
+                  <span>Ultra HD Fabric Detail</span>
+                  <span className="pd-zoom-badge-scale">({zoomLevel.toFixed(1)}x)</span>
                 </div>
-              )}
+                <div className="pd-zoom-window-footer">
+                  <span>Scroll wheel to zoom (1.6x – 4.5x)</span>
+                </div>
+              </div>
             </div>
 
             {/* Product Details (Right) */}
