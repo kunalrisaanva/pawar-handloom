@@ -266,61 +266,27 @@ const SEE_IT_LOVE_IT = [
 
 const COLLECTION_MENU = [
   {
-    name: "Sarees",
-    href: "/shop/2",
+    name: "Maheshwari Sarees",
+    href: "/shop/2/1",
     children: [
-      {
-        name: "Maheshwari Sarees",
-        href: "/shop/2/1",
-        children: [
-          { name: "Pure Silk Cotton Sarees", href: "/shop/2/1/1" },
-          { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
-          { name: "Pure Tissue Saree", href: "/shop/2/1/3" },
-          { name: "Pure Organza Saree", href: "/shop/2/1/7" },
-          { name: "Pure Mulberry", href: "/shop/2/1/8" },
-        ],
-      },
-      {
-        name: "Chanderi Sarees",
-        href: "/shop/2/2",
-        children: [
-          { name: "Pure Silk Cotton Saree", href: "/shop/2/2/4" },
-          { name: "Pure Katan Silk Saree", href: "/shop/2/2/5" },
-          { name: "Pure Pattu Silk Saree", href: "/shop/2/2/6" },
-        ],
-      },
-      { name: "Handblock Printed Sarees", href: "/shop/2/3" },
-      { name: "Pure Cotton Sarees", href: "/shop/2/5" },
+      { name: "Pure Silk Cotton Sarees", href: "/shop/2/1/1" },
+      { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
+      { name: "Pure Tissue Saree", href: "/shop/2/1/3" },
+      { name: "Pure Organza Saree", href: "/shop/2/1/7" },
+      { name: "Pure Mulberry", href: "/shop/2/1/8" },
     ],
   },
   {
-    name: "Dress material",
-    href: "/shop/3",
+    name: "Chanderi Sarees",
+    href: "/shop/2/2",
     children: [
-      {
-        name: "Maheshwari Dress Material",
-        href: "/shop/3/6",
-        children: [
-          { name: "Top and Dupatta set", href: "/shop/3/6/9" },
-          { name: "Full Dress Material", href: "/shop/3/6/10" },
-        ],
-      },
-      {
-        name: "Chanderi Dress Material",
-        href: "/shop/3/7",
-        children: [
-          { name: "Top and Dupatta set", href: "/shop/3/7/11" },
-          { name: "Full Dress Material", href: "/shop/3/7/12" },
-        ],
-      },
-      { name: "HandBlock Dress Material", href: "/shop/3/8" },
-      { name: "Pure Cotton Dress Material", href: "/shop/3/9" },
+      { name: "Pure Silk Cotton Saree", href: "/shop/2/2/4" },
+      { name: "Pure Katan Silk Saree", href: "/shop/2/2/5" },
+      { name: "Pure Pattu Silk Saree", href: "/shop/2/2/6" },
     ],
   },
-  { name: "Stoles/Dupatta", href: "/shop/4" },
-  { name: "New Arrivals", href: "/new-arrivals" },
-  { name: "Best Sellers", href: "/shop/7" },
-  { name: "Celebs Look", href: "/shop/8" },
+  { name: "Handblock Printed Sarees", href: "/shop/2/3" },
+  { name: "Pure Cotton Sarees", href: "/shop/2/5" },
 ];
 
 const OCCASIONS = [
@@ -1121,10 +1087,8 @@ function SocialMediaSection() {
         <div
           className="social-media-grid"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: "50px",
-            alignItems: "stretch",
+            maxWidth: "580px",
+            margin: "0 auto",
           }}
         >
           {/* INSTAGRAM COLUMN */}
@@ -1138,7 +1102,6 @@ function SocialMediaSection() {
               border: "1px solid rgba(0,0,0,0.05)",
               display: "flex",
               flexDirection: "column",
-              height: "100%",
             }}
           >
             <a
@@ -1270,77 +1233,6 @@ function SocialMediaSection() {
                   </div>
                 </a>
               ))}
-            </div>
-          </div>
-
-          {/* YOUTUBE COLUMN */}
-          <div
-            className="youtube-mock"
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-              border: "1px solid rgba(0,0,0,0.05)",
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-            }}
-          >
-            <div
-              style={{
-                padding: "24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderBottom: "1px solid #f0f0f0",
-                flexShrink: 0,
-                height: "114px",
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  color: "#333",
-                  margin: 0,
-                }}
-              >
-                PAWAR HANDLOOM <FaYoutube size={32} color="#FF0000" /> YOUTUBE
-                CHANNEL
-              </h3>
-            </div>
-            <div
-              className="youtube-column-container"
-              style={{
-                width: "100%",
-                flexGrow: 1,
-                backgroundColor: "#000",
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <iframe
-                width="100%"
-                height="100%"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                src="https://www.youtube.com/embed/LXb3EKWsInQ"
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
             </div>
           </div>
         </div>
@@ -1738,15 +1630,7 @@ export default function Index({
                         <ul className="sub-dropdown">
                           {item.children.map((sub) => (
                             <li key={sub.name}>
-                              <a href={sub.href}>
-                                {sub.name}
-                                {"children" in sub && sub.children && (
-                                  <ChevronRight
-                                    size={12}
-                                    style={{ float: "right", marginTop: 3 }}
-                                  />
-                                )}
-                              </a>
+                              <a href={sub.href}>{sub.name}</a>
                             </li>
                           ))}
                         </ul>

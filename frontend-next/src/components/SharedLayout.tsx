@@ -19,61 +19,27 @@ import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
 
 const COLLECTION_MENU = [
   {
-    name: "Sarees",
-    href: "/shop/2",
+    name: "Maheshwari Sarees",
+    href: "/shop/2/1",
     children: [
-      {
-        name: "Maheshwari Sarees",
-        href: "/shop/2/1",
-        children: [
-          { name: "Pure Silk Cotton Sarees", href: "/shop/2/1/1" },
-          { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
-          { name: "Pure Tissue Saree", href: "/shop/2/1/3" },
-          { name: "Pure Organza Saree", href: "/shop/2/1/7" },
-          { name: "Pure Mulberry", href: "/shop/2/1/8" },
-        ],
-      },
-      {
-        name: "Chanderi Sarees",
-        href: "/shop/2/2",
-        children: [
-          { name: "Pure Silk Cotton Saree", href: "/shop/2/2/4" },
-          { name: "Pure Katan Silk Saree", href: "/shop/2/2/5" },
-          { name: "Pure Pattu Silk Saree", href: "/shop/2/2/6" },
-        ],
-      },
-      { name: "Handblock Printed Sarees", href: "/shop/2/3" },
-      { name: "Pure Cotton Sarees", href: "/shop/2/5" },
+      { name: "Pure Silk Cotton Sarees", href: "/shop/2/1/1" },
+      { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
+      { name: "Pure Tissue Saree", href: "/shop/2/1/3" },
+      { name: "Pure Organza Saree", href: "/shop/2/1/7" },
+      { name: "Pure Mulberry", href: "/shop/2/1/8" },
     ],
   },
   {
-    name: "Dress material",
-    href: "/shop/3",
+    name: "Chanderi Sarees",
+    href: "/shop/2/2",
     children: [
-      {
-        name: "Maheshwari Dress Material",
-        href: "/shop/3/6",
-        children: [
-          { name: "Top and Dupatta set", href: "/shop/3/6/9" },
-          { name: "Full Dress Material", href: "/shop/3/6/10" },
-        ],
-      },
-      {
-        name: "Chanderi Dress Material",
-        href: "/shop/3/7",
-        children: [
-          { name: "Top and Dupatta set", href: "/shop/3/7/11" },
-          { name: "Full Dress Material", href: "/shop/3/7/12" },
-        ],
-      },
-      { name: "HandBlock Dress Material", href: "/shop/3/8" },
-      { name: "Pure Cotton Dress Material", href: "/shop/3/9" },
+      { name: "Pure Silk Cotton Saree", href: "/shop/2/2/4" },
+      { name: "Pure Katan Silk Saree", href: "/shop/2/2/5" },
+      { name: "Pure Pattu Silk Saree", href: "/shop/2/2/6" },
     ],
   },
-  { name: "Stoles/Dupatta", href: "/shop/4" },
-  { name: "New Arrivals", href: "/new-arrivals" },
-  { name: "Best Sellers", href: "/shop/7" },
-  { name: "Celebs Look", href: "/shop/8" },
+  { name: "Handblock Printed Sarees", href: "/shop/2/3" },
+  { name: "Pure Cotton Sarees", href: "/shop/2/5" },
 ];
 
 function AnimatedSearchInput({ className }: { className?: string }) {
@@ -397,15 +363,7 @@ export default function SharedLayout({
                         <ul className="sub-dropdown">
                           {item.children.map((sub) => (
                             <li key={sub.name}>
-                              <a href={sub.href}>
-                                {sub.name}
-                                {"children" in sub && sub.children && (
-                                  <ChevronRight
-                                    size={12}
-                                    style={{ float: "right", marginTop: 3 }}
-                                  />
-                                )}
-                              </a>
+                              <a href={sub.href}>{sub.name}</a>
                             </li>
                           ))}
                         </ul>
