@@ -529,13 +529,28 @@ export default function SharedLayout({
             </ul>
 
             <div className="footer-social">
-              <a href="#" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/Official.PawarHandloom/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
                 <FaFacebook size={16} />
               </a>
-              <a href="#" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/official_pawarhandloom/?utm_source=ig_embed&ig_rid=ANSZzKd7RpOjbAQrbnZWD4-"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
                 <FaInstagram size={16} />
               </a>
-              <a href="#" aria-label="YouTube">
+              <a
+                href="https://www.youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
                 <FaYoutube size={16} />
               </a>
             </div>

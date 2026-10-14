@@ -1087,8 +1087,10 @@ function SocialMediaSection() {
         <div
           className="social-media-grid"
           style={{
-            maxWidth: "580px",
-            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "50px",
+            alignItems: "stretch",
           }}
         >
           {/* INSTAGRAM COLUMN */}
@@ -1102,6 +1104,7 @@ function SocialMediaSection() {
               border: "1px solid rgba(0,0,0,0.05)",
               display: "flex",
               flexDirection: "column",
+              height: "100%",
             }}
           >
             <a
@@ -1230,6 +1233,162 @@ function SocialMediaSection() {
                     }}
                   >
                     <Play size={12} color="#fff" fill="#fff" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* FACEBOOK COLUMN */}
+          <div
+            className="facebook-mock"
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              border: "1px solid rgba(0,0,0,0.05)",
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            }}
+          >
+            <a
+              href="https://www.facebook.com/Official.PawarHandloom/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                display: "block",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  padding: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "16px",
+                  borderBottom: "1px solid #f0f0f0",
+                  height: "114px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, #1877F2 0%, #0d65d9 100%)",
+                    padding: "3px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src="https://pawarhandloom.com/public/frontend/img/logo.png"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      backgroundColor: "#fff",
+                      objectFit: "contain",
+                    }}
+                    alt="Facebook Profile"
+                  />
+                </div>
+                <div style={{ flexGrow: 1 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <strong style={{ fontSize: "16px", fontWeight: "600" }}>
+                      Official.PawarHandloom
+                    </strong>
+                    <FaFacebook size={22} color="#1877F2" />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      marginTop: "4px",
+                    }}
+                  >
+                    PAWAR HANDLOOM® (Weaves of Madhya Pradesh)
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#888",
+                      marginTop: "4px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    12.4K followers • Official Facebook Page
+                  </div>
+                </div>
+              </div>
+            </a>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "4px",
+                padding: "4px",
+                flexGrow: 1,
+              }}
+            >
+              {[
+                "https://pawarhandloom.com/public/uploads/products/cover/1756375798_4a24f6b2ccfcdd56abf1.jpeg",
+                "/shop-category-1.png",
+                "/hero-desktop-2.png",
+                "https://pawarhandloom.com/public/uploads/products/cover/1756383012_433d62525d79e078b558.jpeg",
+                "/shop-category-2.png",
+                "/hero-desktop-3.png",
+              ].map((imgSrc, i) => (
+                <a
+                  href="https://www.facebook.com/Official.PawarHandloom/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={i}
+                  className="insta-post-wrapper"
+                  style={{
+                    backgroundColor: "#eee",
+                    position: "relative",
+                    overflow: "hidden",
+                    borderRadius: "4px",
+                    display: "block",
+                    width: "100%",
+                    aspectRatio: "1/1",
+                  }}
+                >
+                  <img
+                    src={imgSrc}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    alt="Facebook post"
+                    className="insta-post-img"
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      backgroundColor: "#1877F2",
+                      borderRadius: "50%",
+                      padding: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FaFacebook size={12} color="#fff" />
                   </div>
                 </a>
               ))}
@@ -2081,13 +2240,28 @@ export default function Index({
             </ul>
 
             <div className="footer-social">
-              <a href="#" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/Official.PawarHandloom/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
                 <FaFacebook size={16} />
               </a>
-              <a href="#" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/official_pawarhandloom/?utm_source=ig_embed&ig_rid=ANSZzKd7RpOjbAQrbnZWD4-"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
                 <FaInstagram size={16} />
               </a>
-              <a href="#" aria-label="YouTube">
+              <a
+                href="https://www.youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
                 <FaYoutube size={16} />
               </a>
             </div>
