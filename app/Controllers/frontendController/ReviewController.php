@@ -57,49 +57,97 @@ class ReviewController extends BaseController
         return view('frontend/includes/pages',$data);
     }
 
-    // Show create form
+    // API: Get all reviews and stats (JSON)
+    public function apiGetReviews()
+    {
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+        header("Access-Control-Allow-Credentials: true");
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
+
+        helper('review');
+        $query = $this->frontModel->getReviewStats();
+
+        $totalReviews = 0;
+        $totalRating = 0;
+        $ratingCounts = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+
+        foreach ($query as $row) {
+            $r = (int)$row['rating'];
+            if ($r >= 1 && $r <= 5) {
+                $ratingCounts[$r] = (int)$row['count'];
+                $totalReviews += (int)$row['count'];
+                $totalRating += ($r * (int)$row['count']);
+            }
+        }
+
+        $averageRating = $totalReviews > 0 ? round($totalRating / $totalReviews, 1) : 0;
+
+        $productReviews = getReviewsWithImages(1) ?? [];
+        $shopReviews = getReviewsWithImages(2) ?? [];
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'averageRating' => $averageRating,
+            'totalReviews' => $totalReviews,
+            'ratingCounts' => $ratingCounts,
+            'productReviews' => $productReviews,
+            'shopReviews' => $shopReviews
+        ]);
+    }
+
+    // Show create form / API Save Review
     public function saveReview()
     {
-        if (isset($_POST['reviewShop'])) {
-        $data = [
-            //'product_id' => $this->request->getPost('user_id'),
-            'product_id' => $this->request->getPost('product_id') ?? 0,
-            'user_id' => $this->request->getPost('user_id'),
-            'review_title' => $this->request->getPost('review_title'),
-            'rating' => $this->request->getPost('rating'),
-            'review_text' => $this->request->getPost('review_text'),
-            'YouTube_url' => $this->request->getPost('YouTube_url'),
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'review_type' => ($this->request->getPost('product_id')) ? 1 : 2, //2= shop review code and 1 is product review 
-        ];
-        // echo"Review :- <pre>";
-        // print_r($data);
-        // die();
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+        header("Access-Control-Allow-Credentials: true");
 
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
+
+        $productId = $this->request->getPost('product_id') ?? 0;
+        $reviewType = ($productId && $productId != '0') ? 1 : 2;
+
+        $data = [
+            'product_id' => $productId,
+            'user_id' => $this->request->getPost('user_id') ?? 0,
+            'review_title' => $this->request->getPost('review_title') ?? '',
+            'rating' => $this->request->getPost('rating') ?? 5,
+            'review_text' => $this->request->getPost('review_text') ?? '',
+            'YouTube_url' => $this->request->getPost('YouTube_url') ?? '',
+            'name' => $this->request->getPost('name') ?? 'Customer',
+            'email' => $this->request->getPost('email') ?? '',
+            'review_type' => $reviewType,
+            'likes' => 0,
+            'status' => 1,
+            'is_deleted' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
         
         $review_id = $this->frontModel->insert_data(TBL_REVIEW, $data);
-         // ✅ Handle image upload if file is selected
+
+        // Handle image upload if files are selected
         $files = $this->request->getFiles(); 
-        //$imageFile = $this->request->getFile('review_image');
-        //echo"Check Image:- <pre>";
-        //print_r($imageFile);
-        //die;
         if (isset($files['review_image'])) {
-            //die("Check Image");
-            //foreach ($imageFiles['review_images'] as $imageFile) {
-                foreach ($files['review_image'] as $imageFile) {
-                if ($imageFile->isValid() && !$imageFile->hasMoved()) {
+            $images = is_array($files['review_image']) ? $files['review_image'] : [$files['review_image']];
+            foreach ($images as $imageFile) {
+                if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
                     $newName = $imageFile->getRandomName();
                     $imageFile->move(FCPATH . 'public/uploads/review_images/', $newName);
 
-                    // Save into TBL_REVIEW_IMAGE
                     $imageData = [
                         'review_id'    => $review_id,
-                        'user_id'      => $this->request->getPost('user_id'),
-                        'product_id'   => $this->request->getPost('product_id') ?? 0,
+                        'user_id'      => $this->request->getPost('user_id') ?? 0,
+                        'product_id'   => $productId,
                         'review_image' => $newName,
-                        'review_type'  => ($this->request->getPost('product_id')) ? 1 : 2,
+                        'review_type'  => $reviewType,
                         'status'       => 1,
                         'is_deleted'   => 1,
                         'created_at'   => date('Y-m-d H:i:s'),
@@ -108,13 +156,31 @@ class ReviewController extends BaseController
                 }
             }
         }
+
+        $acceptHeader = $this->request->getHeaderLine('Accept');
+        if ($this->request->isAJAX() || str_contains($acceptHeader, 'application/json')) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Your review submitted successfully.',
+                'review_id' => $review_id
+            ]);
+        }
+
         return redirect()->to('/Review')->with('success', 'Your Review submitted successfully.');
-    }
     }
     
     //save and show Likes
     public function like()
     {
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+        header("Access-Control-Allow-Credentials: true");
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
+
         $reviewId = $this->request->getPost('id');
         $db = \Config\Database::connect();
     

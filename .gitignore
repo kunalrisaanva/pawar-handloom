@@ -129,5 +129,10 @@ nb-configuration.xml
 frontend-next-backup/
 frontend-next/node_modules/
 frontend-next/.next/
+frontend-next/frontend-next/
+**/.next/
 frontend-next/.env*
+
+public/public
+
 

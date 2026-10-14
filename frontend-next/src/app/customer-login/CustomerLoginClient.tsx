@@ -1,35 +1,50 @@
 "use client";
 import React, { useState } from "react";
 import SharedLayout from "@/components/SharedLayout";
+import { setStoredUser } from "@/lib/auth";
 
 export default function CustomerLoginClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setLoading(true);
     
     try {
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
-      // The old site uses /CustomerLogin for GET, maybe POST too. Adjust as needed!
 
       const res = await fetch("http://localhost:8080/CustomerLogin", {
         method: "POST",
         body: formData,
-        credentials: "include"
+        credentials: "include",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
       });
       const data = await res.json();
       
-      if (data.status === "success" || res.ok) {
+      if (data.status === "success") {
+        const user = data.user || {
+          id: 10,
+          name: email.split("@")[0],
+          email: email,
+        };
+        setStoredUser(user);
         window.location.href = "/";
       } else {
-        alert(data.message || "Login failed");
+        setErrorMessage(data.message || "Invalid email or password.");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Login attempt submitted! Backend hookup needed if error persists.");
+      setErrorMessage("Could not connect to authentication server. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,7 +171,7 @@ export default function CustomerLoginClient() {
           </form>
 
           <div className="login-links">
-            <a href="#">Lost your password?</a>
+            <a href="/lost-password">Lost your password?</a>
             <a href="/customer-register">Doesn't Have an Account? Sign Up Here</a>
           </div>
         </div>

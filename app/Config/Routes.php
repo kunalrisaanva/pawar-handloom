@@ -20,7 +20,7 @@ $routes->get('/register', 'frontendController\HomeController::register');
 $routes->get('/login', 'frontendController\HomeController::login');
 
 $routes->match(['get', 'post'], '/CustomerRegister', 'frontendController\HomeController::customer_login');
-$routes->get('/CustomerLogin', 'frontendController\HomeController::customer_login');
+$routes->match(['get', 'post'], '/CustomerLogin', 'frontendController\HomeController::customer_login');
 
 
 
@@ -50,7 +50,7 @@ $routes->get('success', 'frontendController\CartController::success');
 
 $routes->post('register', 'frontendController\AuthController::register');
 $routes->post('/front/login', 'frontendController\AuthController::login');
-$routes->get('/logout', 'frontendController\AuthController::logout');
+$routes->match(['get', 'post'], '/logout', 'frontendController\AuthController::logout');
 $routes->get('/profile', 'frontendController\HomeController::profile');
 $routes->post('profile/update', 'frontendController\HomeController::profileUpdate');
 $routes->get('/sendsendMail', 'frontendController\CartController::sendMail');
@@ -68,9 +68,10 @@ $routes->get('/UserOrders', 'frontendController\HomeController::userOrders');
 $routes->get('/order-details/(:any)', 'frontendController\HomeController::orderDetails/$1');
 //Review
 $routes->get('/Review', 'frontendController\ReviewController::reviewPage');
+$routes->match(['get', 'options'], 'review/api', 'frontendController\ReviewController::apiGetReviews');
 // Save review (form POST)
-$routes->post('/review/save', 'frontendController\ReviewController::saveReview');
-$routes->post('/review/like', 'frontendController\ReviewController::like');
+$routes->match(['post', 'options'], 'review/save', 'frontendController\ReviewController::saveReview');
+$routes->match(['post', 'options'], 'review/like', 'frontendController\ReviewController::like');
 
 // Search Product 
 $routes->post('search', 'frontendController\SearchController::ajaxSearch');

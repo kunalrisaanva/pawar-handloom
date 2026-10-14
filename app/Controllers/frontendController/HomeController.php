@@ -344,13 +344,16 @@ class HomeController extends BaseController
             }
             
             // ✅ Login Form Submit
-        if ($this->request->getMethod() == 'POST' && $this->request->getPost('submitLogin')) {
+        if ($this->request->getMethod() == 'POST' && ($this->request->getPost('submitLogin') || $this->request->isAJAX() || $this->request->getPost('email'))) {
             $rules = [
                 'email'    => 'required|valid_email',
                 'password' => 'required'
             ];
     
             if (! $this->validate($rules)) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Please enter a valid email and password.']);
+                }
                 $data['validation'] = $this->validator;
             } else {
                 $email    = $this->request->getPost('email');
@@ -358,15 +361,7 @@ class HomeController extends BaseController
     
                 
                 $user = $this->frontModel->select_row(TBL_USER, ['email' => $email]);
-                // echo"Paswword:- ".$password;
-                // echo"<pre>Check User:- <pre>";
-                // print_r($user);
                 $changPass = hash('sha256',trim($this->request->getPost('password')));
-                
-                // echo"ChangePass:- <pre>".$changPass;
-                
-                // die;
-               
     
                 if ($user) {
                     if ($changPass === $user->password) {
@@ -381,39 +376,39 @@ class HomeController extends BaseController
                             'role' => $user->role,
                             'is_logged_in' => true
                         ];
-                        //$session = session();
                         $session->set($sessionData);
                         
-                        // $session->set('userData', [
-                        //     'id'    => $user->id,
-                        //     'name'  => $user->name,
-                        //     'email' => $user->email,
-                        //     //'phone' => $user->phone,
-                        //     'role' => $user->role,
-                        //     'is_logged_in' => true
-                        // ]);
-                         //$session->set($sessionData);
-                        // echo"check Session:- <pre>";
-                        // print_r($session->get('userData'));
-                        // //print_r($session);
-                        // die;
+                        if ($this->request->isAJAX()) {
+                            return $this->response->setJSON([
+                                'status' => 'success',
+                                'message' => 'Login successful!',
+                                'user' => [
+                                    'id' => (int) $user->id,
+                                    'name' => $user->name,
+                                    'email' => $user->email,
+                                    'role' => (int) $user->role,
+                                ]
+                            ]);
+                        }
+
                         $redirect = $session->get('redirect_after_login');
 
                         if(!empty($redirect)){
-    
                             $session->remove('redirect_after_login');
-    
                             return redirect()->to($redirect);
-    
                         }
                         
                         return redirect()->to(base_url('/')); 
                     } else {
-                        //$data['error'] = "Invalid password!";
-                         return redirect()->back()->with('error', 'Invalid password!');
+                        if ($this->request->isAJAX()) {
+                            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid password!']);
+                        }
+                        return redirect()->back()->with('error', 'Invalid password!');
                     }
                 } else {
-                    //$data['error'] = "No account found with this email!";
+                    if ($this->request->isAJAX()) {
+                        return $this->response->setJSON(['status' => 'error', 'message' => 'No account found with this email!']);
+                    }
                     return redirect()->back()->with('error', 'No account found with this email!');
                 }
             }

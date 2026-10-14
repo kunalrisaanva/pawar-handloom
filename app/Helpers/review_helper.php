@@ -34,8 +34,9 @@ function getReviewsWithImages($type)
     $db = \Config\Database::connect();
 
     $builder = $db->table(TBL_REVIEW . ' r')
-        ->select('r.*, GROUP_CONCAT(ri.review_image) as review_images')
+        ->select('r.*, GROUP_CONCAT(ri.review_image) as review_images, p.product_name')
         ->join(TBL_REVIEW_IMAGES . ' ri', 'ri.review_id = r.id', 'left')
+        ->join(TBL_PRODUCT . ' p', 'p.id = r.product_id', 'left')
         ->where('r.status', 1)
         ->where('r.is_deleted', 1)
         ->groupBy('r.id')

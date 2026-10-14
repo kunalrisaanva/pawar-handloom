@@ -391,17 +391,61 @@ ul {
   transform: translateY(0);
 }
 
-.user-dropdown-menu li a {
+.user-dropdown-menu li a,
+.user-dropdown-menu li button {
   display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
   padding: 8px 16px;
   font-size: 13px;
   color: #555;
+  cursor: pointer;
+  font-family: inherit;
   transition: all 0.2s;
 }
 
-.user-dropdown-menu li a:hover {
+.user-dropdown-menu li a:hover,
+.user-dropdown-menu li button:hover {
   color: #ac4024;
   background: #fafafa;
+}
+
+.user-dropdown-header {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid #f0ece6;
+  margin-bottom: 4px;
+}
+
+.user-dropdown-header-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #222;
+}
+
+.user-dropdown-header-email {
+  font-size: 11px;
+  color: #777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.user-dropdown-menu .logout-action {
+  color: #d32f2f !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #f5f0eb;
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.user-dropdown-menu .logout-action:hover {
+  background: #fff5f5 !important;
+  color: #b71c1c !important;
 }
 
 /* ========== HERO SLIDER ========== */
@@ -1712,23 +1756,35 @@ section:has(+ .floral-divider-container) {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: #333;
+  background: #2b2b2b;
   color: #fff;
-  padding: 15px 8px;
+  padding: 16px 8px;
   writing-mode: vertical-rl;
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 2px;
   text-transform: uppercase;
   z-index: 9999;
   cursor: pointer;
-  border-radius: 4px 0 0 4px;
+  border-radius: 8px 0 0 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.reviews-tab:hover {
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding-left: 12px;
 }
 
 .reviews-tab span {
-  color: #f5c518;
-  margin-bottom: 5px;
-  font-size: 16px;
+  color: #f59e0b;
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* Scroll to top */
@@ -2348,10 +2404,48 @@ section:has(+ .floral-divider-container) {
   margin-top: 20px;
 }
 
-.mobile-nav-account a {
-  padding: 7px 0;
+.mobile-nav-account a,
+.mobile-nav-account button {
+  padding: 8px 0;
   font-size: 13px;
   color: #666;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.mobile-nav-account a:hover,
+.mobile-nav-account button:hover {
+  color: #ac4024;
+}
+
+.mobile-nav-user-header {
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #e5dfd7;
+}
+
+.mobile-nav-user-header .name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #222;
+}
+
+.mobile-nav-user-header .email {
+  font-size: 12px;
+  color: #888;
+}
+
+.mobile-nav-account button.mobile-logout-btn {
+  color: #d32f2f;
+  font-weight: 500;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .mobile-nav ul li {
