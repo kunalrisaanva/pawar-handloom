@@ -378,7 +378,7 @@ export default function SharedLayout({
               </li>
               <li>
                 <a href="#">
-                  Shop by Categories{" "}
+                  Shop by Collection{" "}
                   <ChevronDown size={14} style={{ marginTop: 2 }} />
                 </a>
                 <ul className="dropdown">

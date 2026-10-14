@@ -1719,7 +1719,7 @@ export default function Index({
               <li><a href="/shop/2">Shop All</a></li>
               <li>
                 <a href="#">
-                  Shop by Categories{" "}
+                  Shop by Collection{" "}
                   <ChevronDown size={14} style={{ marginTop: 2 }} />
                 </a>
                 <ul className="dropdown">
