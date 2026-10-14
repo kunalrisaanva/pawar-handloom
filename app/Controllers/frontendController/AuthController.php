@@ -244,48 +244,45 @@ class AuthController extends BaseController
         //echo "Request method: " . $this->request->getMethod(); // This will output "get" or "post"
         //die;
         if ($this->request->getMethod() == 'POST') {
+            //die('If');
             $rules = [
                 'email' => 'required|valid_email'
             ];
 
-            $isAjax = $this->request->isAJAX() || $this->request->getGet('format') === 'json' || str_contains($this->request->getHeaderLine('Accept'), 'json');
-
             if (!$this->validate($rules)) {
-                if ($isAjax) {
-                    return $this->response->setJSON([
-                        'status' => 'error',
-                        'message' => 'Please enter a valid email address.'
-                    ]);
-                }
                 return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
             }
 
-            $email = trim($this->request->getPost('email'));
+            $email = $this->request->getPost('email');
             $userModel = new UserModel();
             $user = $userModel->where('email', $email)->first();
 
             if (!$user) {
-                if ($isAjax) {
-                    return $this->response->setJSON([
-                        'status' => 'error',
-                        'message' => 'No account found with this email address.'
-                    ]);
-                }
                 return redirect()->back()->withInput()->with('error', 'Email not found.');
             }
-
+            //echo"Check User:- <pre>";
+            //print_r($user);
+            //echo"User Id :- ". $user['id'];
+            //die;
             $token = bin2hex(random_bytes(50));
             $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            //echo"Token :- ". $token."<pre>";
+            //echo"expiry :- ". $expiry."<pre>";
+
 
             $userModel->update($user['id'], [
                 'reset_token' => $token,
                 'token_expiry' => $expiry
             ]);
 
-            $resetLink = "http://localhost:3000/reset-password/$token";
+            //die("After Update");
+            $resetLink = base_url("reset-password/$token");
             log_message('info', "Password reset link (dev mode): $resetLink");
+            // Send email with token 
 
             $to = $email;  // Customer's email
+            //$admin_email = "info@pawarhandloom.com";  // Admin email
             $subject = "Reset Password - Pawar Handloom";
 
             $message = "
@@ -293,7 +290,7 @@ class AuthController extends BaseController
                         <p>You requested to reset your password for your Pawar Handloom account.</p>
                         <p>Please click the button below to reset your password. This link will expire in 1 hour.</p>
                         <p>
-                            <a href='{$resetLink}' style='padding: 10px 20px; background: #ac4024; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                            <a href='{$resetLink}' style='padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px;'>
                                 Reset Password
                             </a>
                         </p>
@@ -307,16 +304,9 @@ class AuthController extends BaseController
                 "Reply-To: info@pawarhandloom.com" . "\r\n" .
                 "Content-Type: text/html; charset=UTF-8";
 
-            // Send email to customer (suppress warning if sendmail is not configured in local environment)
-            @mail($to, $subject, $message, $headers);
+            // Send email to customer
+            mail($to, $subject, $message, $headers);
 
-            if ($isAjax) {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'A password reset link has been sent to your email address.',
-                    'reset_link' => $resetLink
-                ]);
-            }
 
             return redirect()->back()->with('success', 'A password reset link has been sent to your email address.');
         }
@@ -420,12 +410,6 @@ class AuthController extends BaseController
         $user = $userModel->where('reset_token', $token)->first();
 
         if (!$user || strtotime($user['token_expiry']) < time()) {
-            if ($this->request->isAJAX() || $this->request->getGet('format') === 'json' || str_contains($this->request->getHeaderLine('Accept'), 'json')) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'The reset link is invalid or has expired.'
-                ]);
-            }
             return redirect()->to('/forgotPassword')->with('error', 'The reset link is invalid or has expired.');
         }
 
@@ -435,33 +419,19 @@ class AuthController extends BaseController
                 'confirm_password' => 'required|matches[password]'
             ];
 
-            $isAjax = $this->request->isAJAX() || $this->request->getGet('format') === 'json' || str_contains($this->request->getHeaderLine('Accept'), 'json');
-
             if (!$this->validate($rules)) {
-                if ($isAjax) {
-                    return $this->response->setJSON([
-                        'status' => 'error',
-                        'message' => 'Password must be at least 6 characters and match confirmation.'
-                    ]);
-                }
                 $data['errors'] = $this->validator->getErrors();
                 return view('frontend/includes/pages', $data);
             }
 
-            $newPassword = hash('sha256', trim($this->request->getPost('password')));
+            $newPassword = trim($this->request->getPost('password'));
+
 
             $userModel->update($user['id'], [
                 'password' => $newPassword,
                 'reset_token' => null,
                 'token_expiry' => null
             ]);
-
-            if ($isAjax) {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Password has been reset successfully. You can now log in.'
-                ]);
-            }
 
             return redirect()->to('/login')->with('success', 'Password has been reset successfully. You can now log in.');
         }

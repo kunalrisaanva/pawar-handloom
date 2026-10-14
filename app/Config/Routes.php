@@ -28,7 +28,7 @@ $routes->match(['get', 'post'], '/CustomerLogin', 'frontendController\HomeContro
 //for customers
 $routes->get('/customer_login', 'frontendController\HomeController::customer_login');
 //customer forget password
-$routes->match(['get', 'post'], '/lostPassword', 'frontendController\AuthController::forgotPassword');
+$routes->get('/lostPassword', 'frontendController\HomeController::lostPassword');
 //customer cart
 $routes->get('/customer_cart', 'frontendController\HomeController::customer_cart');
 
