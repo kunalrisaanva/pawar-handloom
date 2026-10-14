@@ -170,7 +170,12 @@ class AuthController extends BaseController
         // } else {
         //     echo "❌ Password is incorrect";
         // }
-        // exit;
+        if (!$user) {
+            if ($this->request->isAJAX())
+                return $this->response->setJSON(['status' => 'error', 'message' => 'User not found.']);
+            return redirect()->back()->withInput()->with('error', 'User not found.');
+        }
+
         if ($user['is_deleted'] == '0') {
             if ($this->request->isAJAX())
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Your account has been deleted.']);
@@ -182,45 +187,49 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('error', 'After approval, you can log in. Please wait.');
         }
 
-
-        if (!$user || $hashedPassword !== $user['password']) {
+        if ($hashedPassword !== $user['password']) {
             if ($this->request->isAJAX())
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid email or password.']);
             return redirect()->back()->withInput()->with('error', 'Invalid email or password.');
         }
 
-        if (!empty($user)) {
-            if ($hashedPassword === $user['password']) {
-                // Set session data
-                $sessionData = [
-                    'user_id' => $user['id'],
-                    'email' => $user['email'],
-                    'company_name' => $user['company_name'],
-                    'role' => $user['role'],
-                    'is_logged_in' => true
-                ];
-                //$session = session();
-                $session->set($sessionData);
+        // Set session data
+        $sessionData = [
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'company_name' => $user['company_name'],
+            'role' => $user['role'],
+            'is_logged_in' => true
+        ];
+        $session->set($sessionData);
 
-                if ($this->request->isAJAX())
-                    return $this->response->setJSON(['status' => 'success', 'message' => 'Login successful!']);
-                return redirect()->to('/')->with('success', 'Login successful!');
-            } else {
-                if ($this->request->isAJAX())
-                    return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid email or password.']);
-                return redirect()->back()->with('error', 'Invalid email or password.');
-            }
-        } else {
-            if ($this->request->isAJAX())
-                return $this->response->setJSON(['status' => 'error', 'message' => 'User not found.']);
-            return redirect()->back()->with('error', 'User not found.');
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Login successful!',
+                'user' => [
+                    'id' => (int) $user['id'],
+                    'name' => $user['name'] ?? $user['company_name'] ?? 'User',
+                    'email' => $user['email'],
+                    'role' => (int) $user['role'],
+                ],
+            ]);
         }
+        return redirect()->to('/')->with('success', 'Login successful!');
     }
 
     public function logout()
     {
         $session = session();
         session()->destroy();
+
+        if ($this->request->isAJAX() || $this->request->getGet('format') === 'json' || str_contains($this->request->getHeaderLine('Accept'), 'json')) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Logged out successfully.'
+            ]);
+        }
+
         return redirect()->to('/login')->with('success', 'Logged out successfully.');
     }
 

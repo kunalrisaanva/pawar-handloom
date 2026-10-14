@@ -20,7 +20,9 @@ import {
   Save,
   X,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
+import { logoutUser } from "@/lib/auth";
 
 interface UserData {
   id: number;
@@ -1085,6 +1087,32 @@ export default function ProfileClient({
                   </div>
                   <ChevronRight size={18} className="pf-menu-arrow" />
                 </a>
+
+                {/* Logout */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logoutUser();
+                  }}
+                  className="pf-menu-item"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    width: "100%",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    padding: "16px 20px",
+                  }}
+                >
+                  <div className="pf-menu-icon" style={{ background: "#fde8e8", color: "#c81e1e" }}>
+                    <LogOut size={20} />
+                  </div>
+                  <div className="pf-menu-content">
+                    <h5 className="pf-menu-title" style={{ color: "#c81e1e" }}>Logout</h5>
+                    <p className="pf-menu-sub">Sign out of your account</p>
+                  </div>
+                  <ChevronRight size={18} className="pf-menu-arrow" style={{ color: "#c81e1e" }} />
+                </button>
               </div>
             </aside>
 

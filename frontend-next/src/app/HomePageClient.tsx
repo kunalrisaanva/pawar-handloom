@@ -30,8 +30,10 @@ import {
   ArrowUpRight,
   CheckCircle,
   Play,
+  LogOut,
 } from "lucide-react";
 import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
+import { getStoredUser, logoutUser, AuthUser } from "@/lib/auth";
 
 /* ── Static Data ────────────────────────────────────────── */
 
@@ -1480,6 +1482,21 @@ export default function Index({
   );
   const [isMobile, setIsMobile] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
+  // Sync auth state
+  useEffect(() => {
+    setCurrentUser(getStoredUser());
+    const handleAuthChange = () => {
+      setCurrentUser(getStoredUser());
+    };
+    window.addEventListener("auth_change", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+    return () => {
+      window.removeEventListener("auth_change", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, []);
 
   // Fetch cart data globally
   useEffect(() => {
@@ -1728,25 +1745,51 @@ export default function Index({
                 <span className="cart-badge">{cartCount}</span>
               </a>
               <div className="user-dropdown">
-                <a href="/profile" title="My Profile">
+                <a href={currentUser ? "/profile" : "/customer-login"} title={currentUser ? currentUser.name : "My Profile"}>
                   <User size={20} />
                 </a>
                 <ul className="user-dropdown-menu">
-                  <li>
-                    <a href="/profile">My Profile</a>
-                  </li>
-                  <li>
-                    <a href="/register">Resellers Register</a>
-                  </li>
-                  <li>
-                    <a href="/login">Reseller Login</a>
-                  </li>
-                  <li>
-                    <a href="/customer-register">Customer Register</a>
-                  </li>
-                  <li>
-                    <a href="/customer-login">Customer Login</a>
-                  </li>
+                  {currentUser ? (
+                    <>
+                      <li className="user-dropdown-header">
+                        <div className="user-dropdown-header-name">Hi, {currentUser.name}</div>
+                        {currentUser.email && <div className="user-dropdown-header-email">{currentUser.email}</div>}
+                      </li>
+                      <li>
+                        <a href="/profile">My Profile</a>
+                      </li>
+                      <li>
+                        <a href="/cart">My Orders</a>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          className="logout-action"
+                          onClick={async () => {
+                            await logoutUser();
+                          }}
+                        >
+                          <LogOut size={14} />
+                          <span>Logout</span>
+                        </button>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        <a href="/customer-login">Customer Login</a>
+                      </li>
+                      <li>
+                        <a href="/customer-register">Customer Register</a>
+                      </li>
+                      <li>
+                        <a href="/login">Reseller Login</a>
+                      </li>
+                      <li>
+                        <a href="/register">Resellers Register</a>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>
@@ -1892,10 +1935,34 @@ export default function Index({
               </li>
             </ul>
             <div className="mobile-nav-account">
-              <a href="/CustomerLogin">Customer Login</a>
-              <a href="/CustomerRegister">Customer Register</a>
-              <a href="/login">Reseller Login</a>
-              <a href="/register">Resellers Register</a>
+              {currentUser ? (
+                <>
+                  <div className="mobile-nav-user-header">
+                    <div className="name">Hi, {currentUser.name}</div>
+                    {currentUser.email && <div className="email">{currentUser.email}</div>}
+                  </div>
+                  <a href="/profile" onClick={() => setMobileMenuOpen(false)}>My Profile</a>
+                  <a href="/cart" onClick={() => setMobileMenuOpen(false)}>My Orders</a>
+                  <button
+                    type="button"
+                    className="mobile-logout-btn"
+                    onClick={async () => {
+                      setMobileMenuOpen(false);
+                      await logoutUser();
+                    }}
+                  >
+                    <LogOut size={15} />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <a href="/customer-login" onClick={() => setMobileMenuOpen(false)}>Customer Login</a>
+                  <a href="/customer-register" onClick={() => setMobileMenuOpen(false)}>Customer Register</a>
+                  <a href="/login" onClick={() => setMobileMenuOpen(false)}>Reseller Login</a>
+                  <a href="/register" onClick={() => setMobileMenuOpen(false)}>Resellers Register</a>
+                </>
+              )}
             </div>
           </div>
         </>
