@@ -185,8 +185,8 @@ export default function LoginClient() {
           </form>
 
           <div className="login-links">
-            <a href="#">Lost your password?</a>
-            <a href="#">Doesn't Have an Account? Sign Up Here</a>
+            <a href="/lost-password">Lost your password?</a>
+            <a href="/register">Doesn't Have an Account? Sign Up Here</a>
           </div>
         </div>
       </div>
