@@ -133,4 +133,6 @@ frontend-next/frontend-next/
 **/.next/
 frontend-next/.env*
 
+public/public
+
 
