@@ -28,17 +28,16 @@ export default function ResetPasswordClient({ token }: { token: string }) {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("password", password);
-      formData.append("confirm_password", confirmPassword);
-
-      const res = await fetch(`http://localhost:8080/reset-password/${token}`, {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
-        body: formData,
-        credentials: "include",
         headers: {
-          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          token,
+          password,
+          confirm_password: confirmPassword,
+        }),
       });
 
       const data = await res.json();

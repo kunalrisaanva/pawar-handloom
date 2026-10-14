@@ -19,16 +19,12 @@ export default function LostPasswordClient() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("email", email.trim());
-
-      const res = await fetch("http://localhost:8080/forgotPassword", {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
-        body: formData,
-        credentials: "include",
         headers: {
-          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ email: email.trim() }),
       });
 
       const data = await res.json();
