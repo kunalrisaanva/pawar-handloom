@@ -19,29 +19,90 @@ import {
 import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
 import { getStoredUser, logoutUser, AuthUser } from "@/lib/auth";
 
-const COLLECTION_MENU = [
+interface SubMenuItem {
+  name: string;
+  href: string;
+}
+
+interface MenuGroup {
+  groupTitle: string;
+  groupHref?: string;
+  items: SubMenuItem[];
+}
+
+interface MenuItem {
+  name: string;
+  href: string;
+  children?: SubMenuItem[];
+  groups?: MenuGroup[];
+}
+
+const COLLECTION_MENU: MenuItem[] = [
   {
-    name: "Maheshwari Sarees",
+    name: "Maheshwari",
     href: "/shop/2/1",
-    children: [
-      { name: "Pure Silk Cotton Sarees", href: "/shop/2/1/1" },
-      { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
-      { name: "Pure Tissue Saree", href: "/shop/2/1/3" },
-      { name: "Pure Organza Saree", href: "/shop/2/1/7" },
-      { name: "Pure Mulberry", href: "/shop/2/1/8" },
+    groups: [
+      {
+        groupTitle: "Sarees",
+        groupHref: "/shop/2/1",
+        items: [
+          { name: "Silk-Cotton Sarees", href: "/shop/2/1/1" },
+          { name: "Garb Reshmi Sarees", href: "/shop/2/1/14" },
+          { name: "Pure Silk Sarees", href: "/shop/2/1/2" },
+          { name: "Tissue-Silk Saree", href: "/shop/2/1/3" },
+          { name: "Mulberry Silk Sarees", href: "/shop/2/1/8" },
+        ],
+      },
+      {
+        groupTitle: "Dress Material",
+        groupHref: "/shop/3/6",
+        items: [
+          { name: "3-Piece Set", href: "/shop/3/6/10" },
+          { name: "2-Piece Set", href: "/shop/3/6/9" },
+        ],
+      },
     ],
   },
   {
-    name: "Chanderi Sarees",
+    name: "Chanderi",
     href: "/shop/2/2",
-    children: [
-      { name: "Pure Silk Cotton Saree", href: "/shop/2/2/4" },
-      { name: "Pure Katan Silk Saree", href: "/shop/2/2/5" },
-      { name: "Pure Pattu Silk Saree", href: "/shop/2/2/6" },
+    groups: [
+      {
+        groupTitle: "Sarees",
+        groupHref: "/shop/2/2",
+        items: [
+          { name: "Silk-Cotton Sarees", href: "/shop/2/2/4" },
+          { name: "Katan-Silk Sarees", href: "/shop/2/2/5" },
+          { name: "Tissue-Silk Sarees", href: "/shop/2/2/15" },
+          { name: "Pattu-Silk Sarees", href: "/shop/2/2/6" },
+        ],
+      },
+      {
+        groupTitle: "Dress Material",
+        groupHref: "/shop/3/7",
+        items: [
+          { name: "3-Piece Set", href: "/shop/3/7/12" },
+          { name: "2-Piece Set", href: "/shop/3/7/11" },
+        ],
+      },
     ],
   },
-  { name: "Handblock Printed Sarees", href: "/shop/2/3" },
-  { name: "Pure Cotton Sarees", href: "/shop/2/5" },
+  {
+    name: "Handblock Printed",
+    href: "/shop/2/3",
+    children: [
+      { name: "Sarees", href: "/shop/2/3" },
+      { name: "Dress Material", href: "/shop/3/8" },
+    ],
+  },
+  {
+    name: "Pure Cotton",
+    href: "/shop/2/5",
+    children: [
+      { name: "Sarees", href: "/shop/2/5" },
+      { name: "Dress Material", href: "/shop/3/9" },
+    ],
+  },
 ];
 
 function AnimatedSearchInput({ className }: { className?: string }) {
@@ -395,14 +456,35 @@ export default function SharedLayout({
                     <li key={item.name}>
                       <a href={item.href}>
                         {item.name}
-                        {item.children && (
+                        {(item.children || item.groups) && (
                           <ChevronRight
                             size={12}
                             style={{ float: "right", marginTop: 3 }}
                           />
                         )}
                       </a>
-                      {item.children && (
+                      {item.groups ? (
+                        <div className="sub-dropdown grouped-sub-dropdown">
+                          {item.groups.map((group, gIdx) => (
+                            <div key={group.groupTitle} className="menu-group-section">
+                              <a href={group.groupHref || "#"} className="menu-group-title">
+                                <span>{group.groupTitle}</span>
+                                <ChevronRight size={10} />
+                              </a>
+                              <ul className="menu-group-list">
+                                {group.items.map((sub) => (
+                                  <li key={sub.name}>
+                                    <a href={sub.href}>{sub.name}</a>
+                                  </li>
+                                ))}
+                              </ul>
+                              {gIdx < (item.groups?.length ?? 0) - 1 && (
+                                <div className="menu-group-divider" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : item.children ? (
                         <ul className="sub-dropdown">
                           {item.children.map((sub) => (
                             <li key={sub.name}>
@@ -410,7 +492,7 @@ export default function SharedLayout({
                             </li>
                           ))}
                         </ul>
-                      )}
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -503,8 +585,50 @@ export default function SharedLayout({
                 {openMobileSubmenu === "collection" && (
                   <ul style={{ paddingLeft: 15 }}>
                     {COLLECTION_MENU.map((item) => (
-                      <li key={item.name}>
-                        <a href={item.href}>{item.name}</a>
+                      <li key={item.name} style={{ marginBottom: item.groups ? 10 : 4 }}>
+                        <a href={item.href} style={{ fontWeight: 600 }}>{item.name}</a>
+                        {item.groups && (
+                          <div style={{ paddingLeft: 12, marginTop: 4, marginBottom: 6 }}>
+                            {item.groups.map((group) => (
+                              <div key={group.groupTitle} style={{ marginBottom: 6 }}>
+                                <a
+                                  href={group.groupHref || "#"}
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.5px",
+                                    color: "#ac4024",
+                                    display: "block",
+                                    padding: "4px 0",
+                                  }}
+                                >
+                                  {group.groupTitle}
+                                </a>
+                                <ul style={{ listStyle: "none", paddingLeft: 8, margin: 0 }}>
+                                  {group.items.map((sub) => (
+                                    <li key={sub.name} style={{ padding: "3px 0" }}>
+                                      <a href={sub.href} style={{ fontSize: 13, color: "#666" }}>
+                                        {sub.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {item.children && (
+                          <ul style={{ listStyle: "none", paddingLeft: 10, margin: "4px 0" }}>
+                            {item.children.map((sub) => (
+                              <li key={sub.name} style={{ padding: "3px 0" }}>
+                                <a href={sub.href} style={{ fontSize: 13, color: "#666" }}>
+                                  {sub.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -328,6 +328,64 @@ ul {
   transform: translateX(0);
 }
 
+/* Grouped Nested Submenu (e.g. Sarees & Dress Material) */
+.dropdown .sub-dropdown.grouped-sub-dropdown {
+  min-width: 235px;
+  padding: 8px 0;
+}
+
+.dropdown .sub-dropdown .menu-group-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown .sub-dropdown .menu-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px 4px 18px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #ac4024;
+  background: transparent;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dropdown .sub-dropdown .menu-group-title:hover {
+  color: #8b2f17;
+  background: #fff5f2;
+}
+
+.dropdown .sub-dropdown .menu-group-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown .sub-dropdown .menu-group-list li a {
+  display: block;
+  padding: 6px 18px 6px 22px;
+  font-size: 13.5px;
+  color: #444;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dropdown .sub-dropdown .menu-group-list li:hover > a {
+  color: #ac4024;
+  background: #fafafa;
+  padding-left: 26px;
+}
+
+.dropdown .sub-dropdown .menu-group-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 6px 14px;
+}
+
 /* Header actions (search, user, cart) */
 .header-actions {
   display: flex;
